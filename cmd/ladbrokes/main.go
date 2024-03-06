@@ -16,7 +16,7 @@ func main() {
 	log := logrus.New()
 	log.Info("Starting service...")
 
-	c := client.New(logrus.NewEntry(log))
+	c := client.NewClient(logrus.NewEntry(log))
 
 	ctx := context.Background()
 

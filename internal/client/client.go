@@ -24,27 +24,27 @@ var (
 	ErrUnexpectedStatusCode = fmt.Errorf("unexpected status code")
 )
 
-type Ladbrokes struct {
+type Client struct {
 	httpClient cycletls.CycleTLS
 	logger     *logrus.Entry
 	pb.UnimplementedIntegrationServer
 }
 
-func New(logger *logrus.Entry) pb.IntegrationServer {
+func NewClient(logger *logrus.Entry) pb.IntegrationServer {
 	go func() {
 		server.Start("8080")
 	}()
-	return &Ladbrokes{
+	return &Client{
 		httpClient: cycletls.Init(),
 		logger:     logger,
 	}
 }
 
-func (c *Ladbrokes) GetLive(ctx context.Context, request *pb.Request) (*pb.Response, error) {
+func (c *Client) GetLive(ctx context.Context, request *pb.Request) (*pb.Response, error) {
 	return nil, nil
 }
 
-func (c *Ladbrokes) GetPreMatch(ctx context.Context, request *pb.Request) (*pb.Response, error) {
+func (c *Client) GetPreMatch(ctx context.Context, request *pb.Request) (*pb.Response, error) {
 	cls, err := c.getClasses(mapping.SportTypesCodes[request.SportType])
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func (c *Ladbrokes) GetPreMatch(ctx context.Context, request *pb.Request) (*pb.R
 	}, err
 }
 
-func (c *Ladbrokes) getClasses(categoryCode int) ([]string, error) {
+func (c *Client) getClasses(categoryCode int) ([]string, error) {
 	url := fmt.Sprintf(classesUrl, categoryCode)
 	res, err := request.Do(
 		&c.httpClient,
@@ -73,7 +73,7 @@ func (c *Ladbrokes) getClasses(categoryCode int) ([]string, error) {
 	return transformer.TransformClasses(r)
 }
 
-func (c *Ladbrokes) getEvents(classesIDs string) ([]*pb.Event, error) {
+func (c *Client) getEvents(classesIDs string) ([]*pb.Event, error) {
 	url := fmt.Sprintf(eventsUrl, classesIDs, time.Now().UTC().Format(time.RFC3339))
 	res, err := request.Do(
 		&c.httpClient,
