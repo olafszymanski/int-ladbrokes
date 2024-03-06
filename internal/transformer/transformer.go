@@ -20,7 +20,7 @@ var (
 	ErrParseMarket    = fmt.Errorf("parsing market failed")
 )
 
-func UnmarshallClasses(reader io.Reader) ([]string, error) {
+func TransformClasses(reader io.Reader) ([]string, error) {
 	var root model.ClassesRoot
 	if err := json.NewDecoder(reader).Decode(&root); err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrDecodeResponse, err)
@@ -28,7 +28,7 @@ func UnmarshallClasses(reader io.Reader) ([]string, error) {
 	return transformClasses(&root), nil
 }
 
-func UnmarshallEvents(reader io.Reader) ([]*pb.Event, error) {
+func TransformEvents(reader io.Reader) ([]*pb.Event, error) {
 	var root model.EventsRoot
 	if err := json.NewDecoder(reader).Decode(&root); err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrDecodeResponse, err)

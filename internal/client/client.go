@@ -68,7 +68,7 @@ func (c *Ladbrokes) getClasses(categoryCode int) ([]string, error) {
 	}
 
 	r := bytes.NewReader([]byte(res.Body))
-	return transformer.UnmarshallClasses(r)
+	return transformer.TransformClasses(r)
 }
 
 func (c *Ladbrokes) getEvents(classesIDs string) ([]*pb.Event, error) {
@@ -84,5 +84,5 @@ func (c *Ladbrokes) getEvents(classesIDs string) ([]*pb.Event, error) {
 	}
 
 	r := bytes.NewReader([]byte(res.Body))
-	return transformer.UnmarshallEvents(r)
+	return transformer.TransformEvents(r)
 }
