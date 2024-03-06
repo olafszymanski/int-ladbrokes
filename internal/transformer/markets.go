@@ -39,7 +39,7 @@ func getMarkets(event *model.Event) ([]*pb.Market, map[string]struct{}, error) {
 		}
 
 		markets = append(markets, &pb.Market{
-			Type:        tp,
+			Type:        &tp,
 			Outcomes:    oc,
 			IsAvailable: av,
 		})
