@@ -13,10 +13,9 @@ import (
 )
 
 func main() {
-	log := logrus.New()
-	log.Info("Starting service...")
+	logrus.Info("Starting service...")
 
-	c := client.NewClient(logrus.NewEntry(log))
+	c := client.NewClient()
 
 	ctx := context.Background()
 
@@ -30,7 +29,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		log.WithField("duration", time.Since(t)).Info("Pre match events fetched")
+		logrus.WithField("duration", time.Since(t)).Info("Pre match events fetched")
 		if err = writeEventsToFile(res.Events, fmt.Sprintf("results/%s.json", tp)); err != nil {
 			panic(err)
 		}

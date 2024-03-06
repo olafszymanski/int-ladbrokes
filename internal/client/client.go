@@ -14,7 +14,6 @@ import (
 	"github.com/olafszymanski/int-sdk/integration/pb"
 	"github.com/olafszymanski/int-sdk/integration/server"
 	"github.com/olafszymanski/int-sdk/request"
-	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -26,17 +25,15 @@ var (
 
 type client struct {
 	httpClient cycletls.CycleTLS
-	logger     *logrus.Entry
 	pb.UnimplementedIntegrationServer
 }
 
-func NewClient(logger *logrus.Entry) pb.IntegrationServer {
+func NewClient() pb.IntegrationServer {
 	go func() {
 		server.Start("8080")
 	}()
 	return &client{
 		httpClient: cycletls.Init(),
-		logger:     logger,
 	}
 }
 
