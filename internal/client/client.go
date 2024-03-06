@@ -12,7 +12,6 @@ import (
 	"github.com/olafszymanski/int-ladbrokes/internal/mapping"
 	"github.com/olafszymanski/int-ladbrokes/internal/transformer"
 	"github.com/olafszymanski/int-sdk/integration/pb"
-	"github.com/olafszymanski/int-sdk/integration/server"
 	"github.com/olafszymanski/int-sdk/request"
 )
 
@@ -29,9 +28,7 @@ type client struct {
 }
 
 func NewClient() pb.IntegrationServer {
-	go func() {
-		server.Start("8080")
-	}()
+	// TODO: Implement .Start() method
 	return &client{
 		httpClient: cycletls.Init(),
 	}
