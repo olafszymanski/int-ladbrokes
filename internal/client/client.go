@@ -25,18 +25,16 @@ var (
 )
 
 type Ladbrokes struct {
-	httpClient  cycletls.CycleTLS
-	logger      *logrus.Entry
-	transformer *transformer.Transformer
+	httpClient cycletls.CycleTLS
+	logger     *logrus.Entry
 	pb.UnimplementedIntegrationServer
 }
 
 func New(logger *logrus.Entry) pb.IntegrationServer {
 	server.Start("8080")
 	return &Ladbrokes{
-		httpClient:  cycletls.Init(),
-		logger:      logger,
-		transformer: transformer.NewTransformer(logger),
+		httpClient: cycletls.Init(),
+		logger:     logger,
 	}
 }
 
@@ -70,7 +68,7 @@ func (c *Ladbrokes) getClasses(categoryCode int) ([]string, error) {
 	}
 
 	r := bytes.NewReader([]byte(res.Body))
-	return c.transformer.UnmarshallClasses(r)
+	return transformer.UnmarshallClasses(r)
 }
 
 func (c *Ladbrokes) getEvents(classesIDs string) ([]*pb.Event, error) {
@@ -86,5 +84,5 @@ func (c *Ladbrokes) getEvents(classesIDs string) ([]*pb.Event, error) {
 	}
 
 	r := bytes.NewReader([]byte(res.Body))
-	return c.transformer.UnmarshallEvents(r)
+	return transformer.UnmarshallEvents(r)
 }

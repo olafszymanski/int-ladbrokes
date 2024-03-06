@@ -20,37 +20,27 @@ var (
 	ErrParseMarket    = fmt.Errorf("parsing market failed")
 )
 
-type Transformer struct {
-	logger *logrus.Entry
-}
-
-func NewTransformer(logger *logrus.Entry) *Transformer {
-	return &Transformer{
-		logger: logger,
-	}
-}
-
-func (t *Transformer) UnmarshallClasses(reader io.Reader) ([]string, error) {
+func UnmarshallClasses(reader io.Reader) ([]string, error) {
 	var root model.ClassesRoot
 	if err := json.NewDecoder(reader).Decode(&root); err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrDecodeResponse, err)
 	}
-	return t.transformClasses(&root), nil
+	return transformClasses(&root), nil
 }
 
-func (t *Transformer) UnmarshallEvents(reader io.Reader) ([]*pb.Event, error) {
+func UnmarshallEvents(reader io.Reader) ([]*pb.Event, error) {
 	var root model.EventsRoot
 	if err := json.NewDecoder(reader).Decode(&root); err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrDecodeResponse, err)
 	}
-	return t.transformEvents(&root)
+	return transformEvents(&root)
 }
 
-func (t *Transformer) transformClasses(classesRoot *model.ClassesRoot) []string {
+func transformClasses(classesRoot *model.ClassesRoot) []string {
 	cls := make([]string, 0, len(classesRoot.SSResponse.Children))
 	for _, c := range classesRoot.SSResponse.Children {
 		cl := &c.Class
-		if !isClassValid(t.logger, cl) {
+		if !isClassValid(cl) {
 			continue
 		}
 		cls = append(cls, cl.ID)
@@ -58,14 +48,14 @@ func (t *Transformer) transformClasses(classesRoot *model.ClassesRoot) []string 
 	return cls
 }
 
-func (t *Transformer) transformEvents(eventsRoot *model.EventsRoot) ([]*pb.Event, error) {
+func transformEvents(eventsRoot *model.EventsRoot) ([]*pb.Event, error) {
 	evs := make([]*pb.Event, 0, len(eventsRoot.SSResponse.Children))
 	for _, e := range eventsRoot.SSResponse.Children {
 		ev := &e.Event
 		if !isEventValid(ev) {
 			continue
 		}
-		tev, err := t.transformEvent(ev)
+		tev, err := transformEvent(ev)
 		if err != nil {
 			return nil, err
 		}
@@ -74,11 +64,11 @@ func (t *Transformer) transformEvents(eventsRoot *model.EventsRoot) ([]*pb.Event
 	return evs, nil
 }
 
-func (t *Transformer) transformEvent(event *model.Event) (*pb.Event, error) {
+func transformEvent(event *model.Event) (*pb.Event, error) {
 	var (
 		stp = mapping.SportTypes[event.CategoryCode]
 		lg  = event.TypeName
-		pts = t.getParticipants(event)
+		pts = getParticipants(event)
 	)
 
 	sti, err := time.Parse(time.RFC3339, event.StartTime)
@@ -86,7 +76,7 @@ func (t *Transformer) transformEvent(event *model.Event) (*pb.Event, error) {
 		return nil, fmt.Errorf("%w: %s", ErrParseTime, err)
 	}
 
-	mks, err := t.getMarkets(event)
+	mks, err := getMarkets(event)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrParseMarket, err)
 	}
@@ -102,10 +92,10 @@ func (t *Transformer) transformEvent(event *model.Event) (*pb.Event, error) {
 	}, nil
 }
 
-func isClassValid(logger *logrus.Entry, class *model.Class) bool {
+func isClassValid(class *model.Class) bool {
 	a, err := strconv.ParseBool(class.IsActive)
 	if err != nil {
-		logger.WithField("class", class).Error("Failed to parse class availability")
+		logrus.WithField("class", class).Error("Failed to parse class availability")
 		a = false
 	}
 	return a

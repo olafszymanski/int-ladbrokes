@@ -7,6 +7,7 @@ import (
 	"github.com/olafszymanski/int-ladbrokes/internal/mapping"
 	"github.com/olafszymanski/int-ladbrokes/internal/model"
 	"github.com/olafszymanski/int-sdk/integration/pb"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -14,7 +15,7 @@ var (
 	ErrParseOddsAvailability    = fmt.Errorf("failed to parse odds availability")
 )
 
-func (t *Transformer) getOutcomes(market *model.Market) ([]*pb.Outcome, error) {
+func getOutcomes(market *model.Market) ([]*pb.Outcome, error) {
 	var (
 		isSpread = isMarketName(market, mapping.Spread1stHalfMarketType) || isMarketName(market, mapping.Spread1stQuarterMarketType)
 		points   *float64
@@ -45,12 +46,12 @@ func (t *Transformer) getOutcomes(market *model.Market) ([]*pb.Outcome, error) {
 
 		ocav, err := getOutcomeAvailability(oc)
 		if err != nil {
-			t.logger.Warn(err.Error())
+			logrus.Warn(err.Error())
 		}
 
 		oddav, err := getOddsAvailability(&oc.Children[0].Price)
 		if err != nil {
-			t.logger.Warn(err.Error())
+			logrus.Warn(err.Error())
 		}
 
 		outcomes = append(outcomes, &pb.Outcome{

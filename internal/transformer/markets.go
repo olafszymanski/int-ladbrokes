@@ -7,30 +7,31 @@ import (
 	"github.com/olafszymanski/int-ladbrokes/internal/mapping"
 	"github.com/olafszymanski/int-ladbrokes/internal/model"
 	"github.com/olafszymanski/int-sdk/integration/pb"
+	"github.com/sirupsen/logrus"
 )
 
 var ErrParseMarketAvailability = fmt.Errorf("failed to parse market availability")
 
-func (t *Transformer) getMarkets(event *model.Event) ([]*pb.Market, error) {
+func getMarkets(event *model.Event) ([]*pb.Market, error) {
 	var markets []*pb.Market
 	for _, m := range event.Children {
 		mr := &m.Market
-		t.logger = t.logger.WithField("market", mr)
+		logger := logrus.WithField("market", mr)
 
 		tp, ok := mapping.MarketTypes[mr.TemplateMarketName]
 		if !ok {
-			t.logger.Warn("Found unhandled market type")
+			logger.Warn("Found unhandled market type")
 			continue
 		}
 
-		oc, err := t.getOutcomes(mr)
+		oc, err := getOutcomes(mr)
 		if err != nil {
 			return nil, err
 		}
 
 		av, err := getMarketAvailability(mr)
 		if err != nil {
-			t.logger.Warn(err.Error())
+			logger.Warn(err.Error())
 		}
 
 		markets = append(markets, &pb.Market{

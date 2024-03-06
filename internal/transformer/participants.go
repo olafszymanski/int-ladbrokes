@@ -6,7 +6,7 @@ import (
 	"github.com/olafszymanski/int-sdk/integration/pb"
 )
 
-func (t *Transformer) getParticipants(event *model.Event) []*pb.Participant {
+func getParticipants(event *model.Event) []*pb.Participant {
 	pts := make([]*pb.Participant, 0)
 	for _, m := range event.Children {
 		mr := &m.Market
