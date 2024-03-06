@@ -12,21 +12,25 @@ import (
 
 var ErrParseMarketAvailability = fmt.Errorf("failed to parse market availability")
 
-func getMarkets(event *model.Event) ([]*pb.Market, error) {
-	var markets []*pb.Market
+// getMarkets returns a slice of markets for the given event, unhandled market types and an error if any
+func getMarkets(event *model.Event) ([]*pb.Market, map[string]struct{}, error) {
+	var (
+		markets              []*pb.Market
+		unhandledMarketTypes = map[string]struct{}{}
+	)
 	for _, m := range event.Children {
 		mr := &m.Market
 		logger := logrus.WithField("market", mr)
 
 		tp, ok := mapping.MarketTypes[mr.TemplateMarketName]
 		if !ok {
-			logger.Warn("Found unhandled market type")
+			unhandledMarketTypes[mr.TemplateMarketName] = struct{}{}
 			continue
 		}
 
 		oc, err := getOutcomes(mr)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		av, err := getMarketAvailability(mr)
@@ -40,7 +44,7 @@ func getMarkets(event *model.Event) ([]*pb.Market, error) {
 			IsAvailable: av,
 		})
 	}
-	return markets, nil
+	return markets, unhandledMarketTypes, nil
 }
 
 func getMarketAvailability(market *model.Market) (bool, error) {

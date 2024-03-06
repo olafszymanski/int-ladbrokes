@@ -49,22 +49,29 @@ func transformClasses(classesRoot *model.ClassesRoot) []string {
 }
 
 func transformEvents(eventsRoot *model.EventsRoot) ([]*pb.Event, error) {
-	evs := make([]*pb.Event, 0, len(eventsRoot.SSResponse.Children))
+	var (
+		evs   = make([]*pb.Event, 0, len(eventsRoot.SSResponse.Children))
+		umtps = make(map[string]struct{})
+	)
 	for _, e := range eventsRoot.SSResponse.Children {
 		ev := &e.Event
 		if !isEventValid(ev) {
 			continue
 		}
-		tev, err := transformEvent(ev)
+		tev, u, err := transformEvent(ev)
 		if err != nil {
 			return nil, err
 		}
 		evs = append(evs, tev)
+		for k := range u {
+			umtps[k] = struct{}{}
+		}
 	}
+	logrus.WithField("unhandled_market_types", stringifyMarketTypes(umtps)).Warn("Found unhandled market types")
 	return evs, nil
 }
 
-func transformEvent(event *model.Event) (*pb.Event, error) {
+func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) {
 	var (
 		stp = mapping.SportTypes[event.CategoryCode]
 		lg  = event.TypeName
@@ -73,12 +80,12 @@ func transformEvent(event *model.Event) (*pb.Event, error) {
 
 	sti, err := time.Parse(time.RFC3339, event.StartTime)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", ErrParseTime, err)
+		return nil, nil, fmt.Errorf("%w: %s", ErrParseTime, err)
 	}
 
-	mks, err := getMarkets(event)
+	mks, umtps, err := getMarkets(event)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", ErrParseMarket, err)
+		return nil, nil, fmt.Errorf("%w: %s", ErrParseMarket, err)
 	}
 
 	return &pb.Event{
@@ -89,7 +96,7 @@ func transformEvent(event *model.Event) (*pb.Event, error) {
 		StartTime:    timestamppb.New(sti),
 		Participants: pts,
 		Markets:      mks,
-	}, nil
+	}, umtps, nil
 }
 
 func isClassValid(class *model.Class) bool {
@@ -103,4 +110,12 @@ func isClassValid(class *model.Class) bool {
 
 func isEventValid(event *model.Event) bool {
 	return event.ID != "" && event.Name != "" && len(event.StartTime) > 0
+}
+
+func stringifyMarketTypes(marketTypes map[string]struct{}) string {
+	var s string
+	for k := range marketTypes {
+		s += k + ","
+	}
+	return s
 }
