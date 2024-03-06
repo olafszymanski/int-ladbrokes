@@ -53,8 +53,8 @@ func transformEvents(eventsRoot *model.EventsRoot) ([]*pb.Event, error) {
 		evs   = make([]*pb.Event, 0, len(eventsRoot.SSResponse.Children))
 		umtps = make(map[string]struct{})
 	)
-	for _, e := range eventsRoot.SSResponse.Children {
-		ev := &e.Event
+	for _, c := range eventsRoot.SSResponse.Children {
+		ev := &c.Event
 		if !isEventValid(ev) {
 			continue
 		}

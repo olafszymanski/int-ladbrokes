@@ -8,12 +8,12 @@ import (
 
 func getParticipants(event *model.Event) []*pb.Participant {
 	pts := make([]*pb.Participant, 0)
-	for _, m := range event.Children {
-		mr := &m.Market
+	for _, ec := range event.Children {
+		mr := &ec.Market
 		if isMarketName(mr, mapping.MoneyLineMarketType) ||
 			isMarketName(mr, mapping.OutrightMarketType) {
-			for _, c := range mr.Children {
-				oc := &c.Outcome
+			for _, mc := range mr.Children {
+				oc := &mc.Outcome
 				pts = append(pts, &pb.Participant{
 					Type: getParticipantType(oc.OutcomeMeaningMinorCode),
 					Name: oc.Name,

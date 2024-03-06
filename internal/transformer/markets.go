@@ -18,8 +18,8 @@ func getMarkets(event *model.Event) ([]*pb.Market, map[string]struct{}, error) {
 		markets              []*pb.Market
 		unhandledMarketTypes = map[string]struct{}{}
 	)
-	for _, m := range event.Children {
-		mr := &m.Market
+	for _, c := range event.Children {
+		mr := &c.Market
 		logger := logrus.WithField("market", mr)
 
 		tp, ok := mapping.MarketTypes[mr.TemplateMarketName]
