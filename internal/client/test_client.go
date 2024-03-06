@@ -6,7 +6,6 @@ import (
 
 	"github.com/olafszymanski/int-ladbrokes/internal/transformer"
 	"github.com/olafszymanski/int-sdk/integration/pb"
-	"github.com/olafszymanski/int-sdk/integration/server"
 )
 
 type TestClientConfig struct {
@@ -19,9 +18,6 @@ type testClient struct {
 }
 
 func NewTestClient(config *TestClientConfig) pb.IntegrationServer {
-	go func() {
-		server.Start("8080")
-	}()
 	return &testClient{
 		config: config,
 	}
