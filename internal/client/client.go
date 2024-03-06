@@ -31,7 +31,9 @@ type Ladbrokes struct {
 }
 
 func New(logger *logrus.Entry) pb.IntegrationServer {
-	server.Start("8080")
+	go func() {
+		server.Start("8080")
+	}()
 	return &Ladbrokes{
 		httpClient: cycletls.Init(),
 		logger:     logger,
