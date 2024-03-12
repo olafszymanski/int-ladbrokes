@@ -9,7 +9,8 @@ import (
 )
 
 type TestClientConfig struct {
-	Input io.Reader
+	LiveInput     io.Reader
+	PreMatchInput io.Reader
 }
 
 type testClient struct {
@@ -24,11 +25,14 @@ func NewTestClient(config *TestClientConfig) pb.IntegrationServer {
 }
 
 func (c *testClient) GetLive(ctx context.Context, request *pb.Request) (*pb.Response, error) {
-	return nil, nil
+	evs, err := transformer.TransformEvents(c.config.LiveInput)
+	return &pb.Response{
+		Events: evs,
+	}, err
 }
 
 func (c *testClient) GetPreMatch(ctx context.Context, request *pb.Request) (*pb.Response, error) {
-	evs, err := transformer.TransformEvents(c.config.Input)
+	evs, err := transformer.TransformEvents(c.config.PreMatchInput)
 	return &pb.Response{
 		Events: evs,
 	}, err
