@@ -1,7 +1,6 @@
 package client
 
 import (
-	"bytes"
 	"fmt"
 
 	"github.com/olafszymanski/int-ladbrokes/internal/transformer"
@@ -17,7 +16,5 @@ func (c *client) fetchEvents(url string) ([]*pb.Event, error) {
 	if res.Status != 200 {
 		return nil, fmt.Errorf("%w: %v", ErrUnexpectedStatusCode, res.Status)
 	}
-
-	r := bytes.NewReader(res.Body)
-	return transformer.TransformEvents(r)
+	return transformer.TransformEvents(res.Body)
 }

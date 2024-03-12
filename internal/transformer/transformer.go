@@ -3,7 +3,6 @@ package transformer
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"strconv"
 	"time"
 
@@ -20,17 +19,17 @@ var (
 	ErrParseMarket    = fmt.Errorf("parsing market failed")
 )
 
-func TransformClasses(reader io.Reader) ([]string, error) {
+func TransformClasses(rawData []byte) ([]string, error) {
 	var root model.ClassesRoot
-	if err := json.NewDecoder(reader).Decode(&root); err != nil {
+	if err := json.Unmarshal(rawData, &root); err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrDecodeResponse, err)
 	}
 	return transformClasses(&root), nil
 }
 
-func TransformEvents(reader io.Reader) ([]*pb.Event, error) {
+func TransformEvents(rawData []byte) ([]*pb.Event, error) {
 	var root model.EventsRoot
-	if err := json.NewDecoder(reader).Decode(&root); err != nil {
+	if err := json.Unmarshal(rawData, &root); err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrDecodeResponse, err)
 	}
 	return transformEvents(&root)

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
+	"runtime/pprof"
 	"strings"
 	"sync"
 	"time"
@@ -18,16 +18,27 @@ import (
 
 func main() {
 	var (
-		liIn string
-		prIn string
-		out  string
+		liIn   string
+		prIn   string
+		out    string
+		cpuOut string
 	)
 	flag.StringVar(&liIn, "live-input", "", "Live input file path to read the data from")
 	flag.StringVar(&prIn, "pre-match-input", "", "Pre match input file path to read the data from")
 	flag.StringVar(&out, "output", "", "Output file path to save the result to")
+	flag.StringVar(&cpuOut, "cpu-output", "", "Output file path to save the CPU profile to")
 	flag.Parse()
 	if liIn == "" && prIn == "" {
 		panic("input file path is required for either live or pre-match")
+	}
+
+	if cpuOut != "" {
+		f, err := os.OpenFile(cpuOut, os.O_CREATE|os.O_RDWR, 0666)
+		if err != nil {
+			panic(err)
+		}
+		pprof.StartCPUProfile(f)
+		defer pprof.StopCPUProfile()
 	}
 
 	cfg := &client.TestClientConfig{}
@@ -36,14 +47,14 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		cfg.LiveInput = bytes.NewReader(f)
+		cfg.LiveInput = f
 	}
 	if prIn != "" {
 		f, err := os.ReadFile(prIn)
 		if err != nil {
 			panic(err)
 		}
-		cfg.PreMatchInput = bytes.NewReader(f)
+		cfg.PreMatchInput = f
 	}
 
 	var (

@@ -1,7 +1,6 @@
 package client
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"strings"
@@ -32,9 +31,7 @@ func (c *client) fetchClasses(sportType pb.SportType) ([]string, error) {
 	if res.Status != 200 {
 		return nil, fmt.Errorf("%w: %v", ErrUnexpectedStatusCode, res.Status)
 	}
-
-	r := bytes.NewReader(res.Body)
-	return transformer.TransformClasses(r)
+	return transformer.TransformClasses(res.Body)
 }
 
 func (c *client) getClasses(sportType pb.SportType) (string, error) {

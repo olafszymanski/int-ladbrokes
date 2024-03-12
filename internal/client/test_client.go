@@ -2,15 +2,14 @@ package client
 
 import (
 	"context"
-	"io"
 
 	"github.com/olafszymanski/int-ladbrokes/internal/transformer"
 	"github.com/olafszymanski/int-sdk/integration/pb"
 )
 
 type TestClientConfig struct {
-	LiveInput     io.Reader
-	PreMatchInput io.Reader
+	LiveInput     []byte
+	PreMatchInput []byte
 }
 
 type testClient struct {
