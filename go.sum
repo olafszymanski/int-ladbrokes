@@ -112,8 +112,8 @@ github.com/neelance/astrewrite v0.0.0-20160511093645-99348263ae86/go.mod h1:kHJE
 github.com/neelance/sourcemap v0.0.0-20151028013722-8c68805598ab/go.mod h1:Qr6/a/Q4r9LP1IltGz7tA7iOK1WonHEYhu1HRBA7ZiM=
 github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI8A=
 github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+AU=
-github.com/olafszymanski/int-sdk v0.0.0-20240306205317-7f687043df36 h1:w9cMWUbxj+veDAM9zIkTAzu2p5HZY5nnoeLAcu/Brw8=
-github.com/olafszymanski/int-sdk v0.0.0-20240306205317-7f687043df36/go.mod h1:LB565TRHRqH+RNy1q7EbZ3mDzq6zsKuo9uxBp7bEQYg=
+github.com/olafszymanski/int-sdk v0.0.0-20240311210345-3b4046b90001 h1:1if5Z9Uqvm2ftXJSkZa6aDh5i/3KkKMu4YMQV+13fYc=
+github.com/olafszymanski/int-sdk v0.0.0-20240311210345-3b4046b90001/go.mod h1:LB565TRHRqH+RNy1q7EbZ3mDzq6zsKuo9uxBp7bEQYg=
 github.com/onsi/ginkgo v1.6.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
 github.com/onsi/ginkgo v1.12.1/go.mod h1:zj2OWP4+oCPe1qIXoGWkgMRwljMUYCdkwsT2108oapk=
 github.com/onsi/ginkgo v1.16.4 h1:29JGrr5oVBm5ulCWet69zQkzWipVXIol6ygQUe/EzNc=

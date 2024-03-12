@@ -3,13 +3,13 @@ module github.com/olafszymanski/int-ladbrokes
 go 1.21.6
 
 require (
-	github.com/Danny-Dasilva/CycleTLS/cycletls v1.0.26
-	github.com/olafszymanski/int-sdk v0.0.0-20240306205317-7f687043df36
+	github.com/olafszymanski/int-sdk v0.0.0-20240311210345-3b4046b90001
 	github.com/sirupsen/logrus v1.9.3
 	google.golang.org/protobuf v1.32.0
 )
 
 require (
+	github.com/Danny-Dasilva/CycleTLS/cycletls v1.0.26 // indirect
 	github.com/Danny-Dasilva/fhttp v0.0.0-20240217042913-eeeb0b347ce1 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect

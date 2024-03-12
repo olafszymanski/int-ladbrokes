@@ -6,13 +6,16 @@ import (
 
 	"github.com/olafszymanski/int-ladbrokes/internal/client"
 	"github.com/olafszymanski/int-sdk/integration/pb"
+	"github.com/olafszymanski/int-sdk/storage"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
 	logrus.Info("Starting service...")
 
-	c := client.NewClient()
+	s := storage.NewMemoryStorage()
+
+	c := client.NewClient(s)
 
 	ctx := context.Background()
 
@@ -21,6 +24,12 @@ func main() {
 		pb.SportType_BASKETBALL,
 	} {
 		_, err := c.GetPreMatch(ctx, &pb.Request{
+			SportType: tp,
+		})
+		if err != nil {
+			panic(err)
+		}
+		_, err = c.GetPreMatch(ctx, &pb.Request{
 			SportType: tp,
 		})
 		if err != nil {

@@ -1,36 +1,35 @@
 package client
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"net/http"
-	"strings"
 	"time"
 
-	"github.com/Danny-Dasilva/CycleTLS/cycletls"
-	"github.com/olafszymanski/int-ladbrokes/internal/mapping"
-	"github.com/olafszymanski/int-ladbrokes/internal/transformer"
+	"github.com/olafszymanski/int-sdk/httptls"
 	"github.com/olafszymanski/int-sdk/integration/pb"
-	"github.com/olafszymanski/int-sdk/request"
+	"github.com/olafszymanski/int-sdk/storage"
+)
+
+const (
+	preMatchEventsUrl = "https://ss-aka-ori.ladbrokes.com/openbet-ssviewer/Drilldown/2.81/EventToOutcomeForClass/%s?simpleFilter=event.isStarted:isFalse&simpleFilter=event.startTime:greaterThanOrEqual:%s&translationLang=en&responseFormat=json&prune=event&prune=market&childCount=event"
 )
 
 var (
 	ErrRequest              = fmt.Errorf("request failed")
-	ErrOpenFile             = fmt.Errorf("failed to open file")
-	ErrWriteFile            = fmt.Errorf("failed to write to file")
 	ErrUnexpectedStatusCode = fmt.Errorf("unexpected status code")
 )
 
 type client struct {
-	httpClient cycletls.CycleTLS
+	httpClient *httptls.HTTPClient
+	storage    storage.Storager
 	pb.UnimplementedIntegrationServer
 }
 
-func NewClient() pb.IntegrationServer {
+func NewClient(storage storage.Storager) pb.IntegrationServer {
 	// TODO: Implement .Start() method
 	return &client{
-		httpClient: cycletls.Init(),
+		httpClient: httptls.NewHTTPClient(),
+		storage:    storage,
 	}
 }
 
@@ -39,46 +38,15 @@ func (c *client) GetLive(ctx context.Context, request *pb.Request) (*pb.Response
 }
 
 func (c *client) GetPreMatch(ctx context.Context, request *pb.Request) (*pb.Response, error) {
-	cls, err := c.getClasses(mapping.SportTypesCodes[request.SportType])
+	cls, err := c.getClasses(request.SportType)
 	if err != nil {
 		return nil, err
 	}
 
-	clsStr := strings.Join(cls, ",")
-	evs, err := c.getEvents(clsStr)
+	evs, err := c.fetchEvents(
+		fmt.Sprintf(preMatchEventsUrl, cls, time.Now().UTC().Format(time.RFC3339)),
+	)
 	return &pb.Response{
 		Events: evs,
 	}, err
-}
-
-func (c *client) getClasses(categoryCode int) ([]string, error) {
-	url := fmt.Sprintf(classesUrl, categoryCode)
-	res, err := request.Do(
-		&c.httpClient,
-		url,
-		http.MethodGet,
-		2000,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	r := bytes.NewReader([]byte(res.Body))
-	return transformer.TransformClasses(r)
-}
-
-func (c *client) getEvents(classesIDs string) ([]*pb.Event, error) {
-	url := fmt.Sprintf(eventsUrl, classesIDs, time.Now().UTC().Format(time.RFC3339))
-	res, err := request.Do(
-		&c.httpClient,
-		url,
-		http.MethodGet,
-		2000,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	r := bytes.NewReader([]byte(res.Body))
-	return transformer.TransformEvents(r)
 }
