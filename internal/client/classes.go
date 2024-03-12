@@ -33,7 +33,7 @@ func (c *client) fetchClasses(sportType pb.SportType) ([]string, error) {
 		return nil, fmt.Errorf("%w: %v", ErrUnexpectedStatusCode, res.Status)
 	}
 
-	r := bytes.NewReader([]byte(res.Body))
+	r := bytes.NewReader(res.Body)
 	return transformer.TransformClasses(r)
 }
 
