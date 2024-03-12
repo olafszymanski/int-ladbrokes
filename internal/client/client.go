@@ -12,6 +12,7 @@ import (
 
 const (
 	preMatchEventsUrl = "https://ss-aka-ori.ladbrokes.com/openbet-ssviewer/Drilldown/2.81/EventToOutcomeForClass/%s?simpleFilter=event.isStarted:isFalse&simpleFilter=event.startTime:greaterThanOrEqual:%s&translationLang=en&responseFormat=json&prune=event&prune=market&childCount=event"
+	liveEventsUrl     = "https://ss-aka-ori.ladbrokes.com/openbet-ssviewer/Drilldown/2.81/EventToOutcomeForClass/%s?simpleFilter=event.isStarted:isTrue&simpleFilter=event.startTime:greaterThanOrEqual:%s&translationLang=en&responseFormat=json&prune=event&prune=market&childCount=event"
 )
 
 var (
@@ -34,7 +35,17 @@ func NewClient(storage storage.Storager) pb.IntegrationServer {
 }
 
 func (c *client) GetLive(ctx context.Context, request *pb.Request) (*pb.Response, error) {
-	return nil, nil
+	cls, err := c.getClasses(request.SportType)
+	if err != nil {
+		return nil, err
+	}
+
+	evs, err := c.fetchEvents(
+		fmt.Sprintf(liveEventsUrl, cls, time.Now().UTC().Format(time.RFC3339)),
+	)
+	return &pb.Response{
+		Events: evs,
+	}, err
 }
 
 func (c *client) GetPreMatch(ctx context.Context, request *pb.Request) (*pb.Response, error) {
