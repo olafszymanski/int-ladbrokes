@@ -1,11 +1,8 @@
 package main
 
 import (
-	"context"
-	"time"
-
 	"github.com/olafszymanski/int-ladbrokes/internal/client"
-	"github.com/olafszymanski/int-sdk/integration/pb"
+	"github.com/olafszymanski/int-ladbrokes/internal/config"
 	"github.com/olafszymanski/int-sdk/storage"
 	"github.com/sirupsen/logrus"
 )
@@ -13,28 +10,12 @@ import (
 func main() {
 	logrus.Info("Starting service...")
 
+	cfg, err := config.NewConfig()
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to load config")
+	}
+
 	s := storage.NewMemoryStorage()
 
-	c := client.NewClient(s)
-
-	ctx := context.Background()
-
-	t := time.Now()
-	for _, tp := range []pb.SportType{
-		pb.SportType_BASKETBALL,
-	} {
-		_, err := c.GetPreMatch(ctx, &pb.Request{
-			SportType: tp,
-		})
-		if err != nil {
-			panic(err)
-		}
-		_, err = c.GetPreMatch(ctx, &pb.Request{
-			SportType: tp,
-		})
-		if err != nil {
-			panic(err)
-		}
-		logrus.WithField("duration", time.Since(t)).Info("Pre match events fetched")
-	}
+	client.NewClient(cfg, s)
 }

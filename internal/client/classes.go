@@ -44,7 +44,7 @@ func (c *client) getClasses(sportType pb.SportType) (string, error) {
 
 		cls = strings.Join(rawCls, ",")
 
-		go func(cls any) {
+		go func() {
 			if err = c.storage.StoreAny(
 				fmt.Sprintf(classesStorageKey, sportType),
 				cls,
@@ -52,7 +52,7 @@ func (c *client) getClasses(sportType pb.SportType) (string, error) {
 			); err != nil {
 				logrus.WithError(err).Error("failed to store classes in storage")
 			}
-		}(cls)
+		}()
 	}
 	return cls.(string), nil
 }

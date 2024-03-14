@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/olafszymanski/int-ladbrokes/internal/config"
 	"github.com/olafszymanski/int-sdk/httptls"
 	"github.com/olafszymanski/int-sdk/integration/pb"
 	"github.com/olafszymanski/int-sdk/storage"
@@ -22,14 +23,15 @@ var (
 
 type client struct {
 	httpClient *httptls.HTTPClient
+	config     *config.Config
 	storage    storage.Storager
 	pb.UnimplementedIntegrationServer
 }
 
-func NewClient(storage storage.Storager) pb.IntegrationServer {
-	// TODO: Implement .Start() method
+func NewClient(cfg *config.Config, storage storage.Storager) pb.IntegrationServer {
 	return &client{
 		httpClient: httptls.NewHTTPClient(),
+		config:     cfg,
 		storage:    storage,
 	}
 }
@@ -42,6 +44,7 @@ func (c *client) GetLive(ctx context.Context, request *pb.Request) (*pb.Response
 
 	evs, err := c.fetchEvents(
 		fmt.Sprintf(liveEventsUrl, cls, time.Now().UTC().Format(time.RFC3339)),
+		c.config.LiveEventsRequestTimeout,
 	)
 	return &pb.Response{
 		Events: evs,
@@ -56,6 +59,7 @@ func (c *client) GetPreMatch(ctx context.Context, request *pb.Request) (*pb.Resp
 
 	evs, err := c.fetchEvents(
 		fmt.Sprintf(preMatchEventsUrl, cls, time.Now().UTC().Format(time.RFC3339)),
+		c.config.PreMatchEventsRequestTimeout,
 	)
 	return &pb.Response{
 		Events: evs,

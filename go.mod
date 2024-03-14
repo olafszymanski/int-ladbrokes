@@ -3,6 +3,7 @@ module github.com/olafszymanski/int-ladbrokes
 go 1.21.6
 
 require (
+	github.com/caarlos0/env/v10 v10.0.0
 	github.com/olafszymanski/int-sdk v0.0.0-20240311210345-3b4046b90001
 	github.com/sirupsen/logrus v1.9.3
 	google.golang.org/protobuf v1.32.0
