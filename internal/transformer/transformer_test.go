@@ -128,6 +128,7 @@ func TestTransformEventsBasketball(t *testing.T) {
 							},
 						},
 					},
+					Link: getStringPtr("https://sports.ladbrokes.com/event/basketball/european-competitions/euroleague-men/as-monaco-v-crvena-zvezda/243810572/all-markets"),
 				},
 			},
 			expectedErr: nil,
@@ -196,6 +197,7 @@ func TestTransformEventsBasketball(t *testing.T) {
 							},
 						},
 					},
+					Link: getStringPtr("https://sports.ladbrokes.com/event/basketball/spanish/spanish-acb/2023-2024-spanish-acb/241631428/all-markets"),
 				},
 			},
 			expectedErr: nil,
@@ -212,4 +214,8 @@ func TestTransformEventsBasketball(t *testing.T) {
 			require.Equal(t, tt.events, evs)
 		})
 	}
+}
+
+func getStringPtr(s string) *string {
+	return &s
 }

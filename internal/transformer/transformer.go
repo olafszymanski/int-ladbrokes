@@ -101,6 +101,8 @@ func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) 
 		name = fmt.Sprintf("%s vs %s", pts[0].Name, pts[1].Name)
 	}
 
+	l := getEventLink(event)
+
 	return &pb.Event{
 		// ID:           bookmaker.GenerateId(st, stp, lg, pts),
 		SportType:    stp,
@@ -109,6 +111,7 @@ func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) 
 		StartTime:    timestamppb.New(sti),
 		Participants: pts,
 		Markets:      mks,
+		Link:         &l,
 	}, umtps, nil
 }
 
@@ -131,4 +134,22 @@ func stringifyMarketTypes(marketTypes map[string]struct{}) string {
 		s += k + ","
 	}
 	return s
+}
+
+func getEventLink(event *model.Event) string {
+	return fmt.Sprintf(
+		"https://sports.ladbrokes.com/event/%s/%s/%s/%s/%s/all-markets",
+		normalizeLinkPart(event.CategoryName),
+		normalizeLinkPart(event.ClassName),
+		normalizeLinkPart(event.TypeName),
+		normalizeLinkPart(event.Name),
+		event.ID,
+	)
+}
+
+func normalizeLinkPart(part string) string {
+	p := strings.ReplaceAll(part, " ", "-")
+	p = strings.ReplaceAll(p, "/", "-")
+	p = strings.ToLower(p)
+	return p
 }
