@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/olafszymanski/int-ladbrokes/internal/mapping"
@@ -14,9 +15,9 @@ import (
 )
 
 var (
-	ErrDecodeResponse = fmt.Errorf("decoding response failed")
-	ErrParseTime      = fmt.Errorf("parsing time failed")
-	ErrParseMarket    = fmt.Errorf("parsing market failed")
+	ErrDecodeResponse      = fmt.Errorf("decoding response failed")
+	ErrParseTime           = fmt.Errorf("parsing time failed")
+	ErrTooManyParticipants = fmt.Errorf("too many participants")
 )
 
 func TransformClasses(rawData []byte) ([]string, error) {
@@ -66,7 +67,9 @@ func transformEvents(eventsRoot *model.EventsRoot) ([]*pb.Event, error) {
 			umtps[k] = struct{}{}
 		}
 	}
-	logrus.WithField("unhandled_market_types", stringifyMarketTypes(umtps)).Warn("Found unhandled market types")
+	if len(umtps) > 0 {
+		logrus.WithField("unhandled_market_types", stringifyMarketTypes(umtps)).Warn("Found unhandled market types")
+	}
 	return evs, nil
 }
 
@@ -77,6 +80,9 @@ func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) 
 		pts = getParticipants(event)
 	)
 
+	if len(strings.TrimSpace(event.StartTime)) == 0 {
+		return nil, nil, fmt.Errorf("%w: empty start time", ErrParseTime)
+	}
 	sti, err := time.Parse(time.RFC3339, event.StartTime)
 	if err != nil {
 		return nil, nil, fmt.Errorf("%w: %s", ErrParseTime, err)
@@ -84,13 +90,21 @@ func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) 
 
 	mks, umtps, err := getMarkets(event)
 	if err != nil {
-		return nil, nil, fmt.Errorf("%w: %s", ErrParseMarket, err)
+		return nil, nil, err
+	}
+
+	name := event.Name
+	if len(pts) > 0 && pts[0].Type != pb.ParticipantType_COMPETITOR {
+		if len(pts) > 2 {
+			return nil, nil, fmt.Errorf("%w: expected 2", ErrTooManyParticipants)
+		}
+		name = fmt.Sprintf("%s vs %s", pts[0].Name, pts[1].Name)
 	}
 
 	return &pb.Event{
 		// ID:           bookmaker.GenerateId(st, stp, lg, pts),
 		SportType:    stp,
-		Name:         event.Name,
+		Name:         name,
 		League:       lg,
 		StartTime:    timestamppb.New(sti),
 		Participants: pts,
@@ -108,7 +122,7 @@ func isClassValid(class *model.Class) bool {
 }
 
 func isEventValid(event *model.Event) bool {
-	return event.ID != "" && event.Name != "" && len(event.StartTime) > 0
+	return event.ID != "" && event.Name != ""
 }
 
 func stringifyMarketTypes(marketTypes map[string]struct{}) string {

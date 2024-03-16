@@ -12,7 +12,8 @@ import (
 
 var (
 	ErrParseOutcomeAvailability = fmt.Errorf("failed to parse outcome availability")
-	ErrParseOddsAvailability    = fmt.Errorf("failed to parse odds availability")
+	ErrParsePoints              = fmt.Errorf("failed to parse points")
+	ErrParsePrice               = fmt.Errorf("failed to parse price")
 )
 
 func getOutcomes(market *model.Market) ([]*pb.Outcome, error) {
@@ -34,7 +35,7 @@ func getOutcomes(market *model.Market) ([]*pb.Outcome, error) {
 
 		dec, err := strconv.ParseFloat(oc.Children[0].Price.PriceDec, 64)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w: %s", ErrParsePrice, err)
 		}
 
 		if isSpread {
@@ -46,12 +47,7 @@ func getOutcomes(market *model.Market) ([]*pb.Outcome, error) {
 
 		ocav, err := getOutcomeAvailability(oc)
 		if err != nil {
-			logrus.Warn(err.Error())
-		}
-
-		oddav, err := getOddsAvailability(&oc.Children[0].Price)
-		if err != nil {
-			logrus.Warn(err.Error())
+			logrus.Error(err.Error())
 		}
 
 		outcomes = append(outcomes, &pb.Outcome{
@@ -62,7 +58,6 @@ func getOutcomes(market *model.Market) ([]*pb.Outcome, error) {
 				Numerator:   oc.Children[0].Price.PriceNum,
 				Denominator: oc.Children[0].Price.PriceDen,
 				American:    oc.Children[0].Price.PriceAmerican,
-				IsAvailable: oddav,
 			},
 			IsAvailable: ocav,
 		})
@@ -85,7 +80,7 @@ func getPointsFromMarket(market *model.Market) (*float64, error) {
 	}
 	p, err := strconv.ParseFloat(v, 64)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w from market: %s", ErrParsePoints, err)
 	}
 	return &p, nil
 }
@@ -102,7 +97,7 @@ func getPointsFromPrice(price *model.Price) (*float64, error) {
 
 	p, err := strconv.ParseFloat(v, 64)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w from price: %s", ErrParsePoints, err)
 	}
 	return &p, nil
 }
@@ -115,15 +110,7 @@ func getOutcomeAvailability(outcome *model.Outcome) (bool, error) {
 
 	dp, err := strconv.ParseBool(outcome.IsDisplayed)
 	if err != nil {
-		return false, ErrParseOutcomeAvailability
+		return false, fmt.Errorf("%w: %s", ErrParseOutcomeAvailability, err)
 	}
 	return dp && outcome.OutcomeStatusCode != model.SuspendedOutcomeCode, nil
-}
-
-func getOddsAvailability(price *model.Price) (bool, error) {
-	av, err := strconv.ParseBool(price.IsActive)
-	if err != nil {
-		return false, ErrParseOddsAvailability
-	}
-	return av, nil
 }
