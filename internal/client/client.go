@@ -3,17 +3,11 @@ package client
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/olafszymanski/int-ladbrokes/internal/config"
 	"github.com/olafszymanski/int-sdk/httptls"
 	"github.com/olafszymanski/int-sdk/integration/pb"
 	"github.com/olafszymanski/int-sdk/storage"
-)
-
-const (
-	preMatchEventsUrl = "https://ss-aka-ori.ladbrokes.com/openbet-ssviewer/Drilldown/2.81/EventToOutcomeForClass/%s?simpleFilter=event.isStarted:isFalse&simpleFilter=event.startTime:greaterThanOrEqual:%s&translationLang=en&responseFormat=json&prune=event&prune=market&childCount=event"
-	liveEventsUrl     = "https://ss-aka-ori.ladbrokes.com/openbet-ssviewer/Drilldown/2.81/EventToOutcomeForClass/%s?simpleFilter=event.isStarted:isTrue&simpleFilter=event.startTime:greaterThanOrEqual:%s&translationLang=en&responseFormat=json&prune=event&prune=market&childCount=event"
 )
 
 var (
@@ -42,10 +36,7 @@ func (c *client) GetLive(ctx context.Context, request *pb.Request) (*pb.Response
 		return nil, err
 	}
 
-	evs, err := c.fetchEvents(
-		fmt.Sprintf(liveEventsUrl, cls, time.Now().UTC().Format(time.RFC3339)),
-		c.config.LiveEventsRequestTimeout,
-	)
+	evs, err := c.getEvents(liveEventsUrl, cls, c.config.MaxLiveEventsConcurrentRequests, c.config.LiveEventsRequestTimeout)
 	return &pb.Response{
 		Events: evs,
 	}, err
@@ -57,10 +48,7 @@ func (c *client) GetPreMatch(ctx context.Context, request *pb.Request) (*pb.Resp
 		return nil, err
 	}
 
-	evs, err := c.fetchEvents(
-		fmt.Sprintf(preMatchEventsUrl, cls, time.Now().UTC().Format(time.RFC3339)),
-		c.config.PreMatchEventsRequestTimeout,
-	)
+	evs, err := c.getEvents(preMatchEventsUrl, cls, c.config.MaxPreMatchEventsConcurrentRequests, c.config.PreMatchEventsRequestTimeout)
 	return &pb.Response{
 		Events: evs,
 	}, err
