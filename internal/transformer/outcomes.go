@@ -11,9 +11,10 @@ import (
 )
 
 var (
-	ErrParseOutcomeAvailability = fmt.Errorf("failed to parse outcome availability")
-	ErrParsePoints              = fmt.Errorf("failed to parse points")
-	ErrParsePrice               = fmt.Errorf("failed to parse price")
+	ErrParseOutcomeAvailability   = fmt.Errorf("failed to parse outcome availability")
+	ErrParsePoints                = fmt.Errorf("failed to parse points")
+	ErrParsePrice                 = fmt.Errorf("failed to parse price")
+	ErrParseFixedOddsAvailability = fmt.Errorf("failed to parse fixed odds availability")
 )
 
 func getOutcomes(market *model.Market) ([]*pb.Outcome, error) {
@@ -50,14 +51,20 @@ func getOutcomes(market *model.Market) ([]*pb.Outcome, error) {
 			logrus.Error(err.Error())
 		}
 
+		foav, err := strconv.ParseBool(oc.FixedOddsAvail)
+		if err != nil {
+			return nil, fmt.Errorf("%w: %s", ErrParseFixedOddsAvailability, err)
+		}
+
 		outcomes = append(outcomes, &pb.Outcome{
 			Name:   oc.Name,
 			Points: points,
 			Odds: &pb.Odds{
 				Decimal:     dec,
+				American:    oc.Children[0].Price.PriceAmerican,
 				Numerator:   oc.Children[0].Price.PriceNum,
 				Denominator: oc.Children[0].Price.PriceDen,
-				American:    oc.Children[0].Price.PriceAmerican,
+				IsFixed:     foav,
 			},
 			IsAvailable: ocav,
 		})

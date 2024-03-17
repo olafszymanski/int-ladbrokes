@@ -24,6 +24,8 @@ var (
 	basketballInvalidPointsFromMarketData []byte
 	//go:embed testdata/basketball/invalid_points_from_price.json
 	basketballInvalidPointsFromPriceData []byte
+	//go:embed testdata/basketball/invalid_fixed_odds_availability.json
+	basketballInvalidFixedPointsAvailabilityData []byte
 	//go:embed testdata/basketball/success.json
 	basketballSuccessData []byte
 	//go:embed testdata/basketball/success_outright.json
@@ -80,6 +82,12 @@ func TestTransformEventsBasketball(t *testing.T) {
 			expectedErr: transformer.ErrParsePoints,
 		},
 		{
+			name:        "invalid fixed odds availability",
+			data:        basketballInvalidFixedPointsAvailabilityData,
+			events:      nil,
+			expectedErr: transformer.ErrParseFixedOddsAvailability,
+		},
+		{
 			name: "success",
 			data: basketballSuccessData,
 			events: []*pb.Event{
@@ -111,6 +119,7 @@ func TestTransformEventsBasketball(t *testing.T) {
 										American:    "-450",
 										Numerator:   "2",
 										Denominator: "9",
+										IsFixed:     true,
 									},
 									IsAvailable: true,
 								},
@@ -122,6 +131,7 @@ func TestTransformEventsBasketball(t *testing.T) {
 										American:    "270",
 										Numerator:   "27",
 										Denominator: "10",
+										IsFixed:     true,
 									},
 									IsAvailable: true,
 								},
@@ -169,6 +179,7 @@ func TestTransformEventsBasketball(t *testing.T) {
 										American:    "3300",
 										Numerator:   "33",
 										Denominator: "1",
+										IsFixed:     true,
 									},
 									IsAvailable: true,
 								},
@@ -180,6 +191,7 @@ func TestTransformEventsBasketball(t *testing.T) {
 										American:    "10000",
 										Numerator:   "100",
 										Denominator: "1",
+										IsFixed:     true,
 									},
 									IsAvailable: true,
 								},
@@ -191,6 +203,7 @@ func TestTransformEventsBasketball(t *testing.T) {
 										American:    "10000",
 										Numerator:   "100",
 										Denominator: "1",
+										IsFixed:     true,
 									},
 									IsAvailable: true,
 								},
