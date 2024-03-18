@@ -116,6 +116,10 @@ func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) 
 }
 
 func isClassValid(class *model.Class) bool {
+	if class.IsActive == "" {
+		return false
+	}
+
 	a, err := strconv.ParseBool(class.IsActive)
 	if err != nil {
 		logrus.WithField("class", class).Error("failed to parse class availability")
