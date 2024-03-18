@@ -99,11 +99,11 @@ func TestTransformEventsBasketball(t *testing.T) {
 					StartTime: timestamppb.New(time.Date(2024, 3, 7, 18, 0, 0, 0, time.UTC)),
 					Participants: []*pb.Participant{
 						{
-							Type: pb.ParticipantType_HOME,
+							Type: getParticipantTypePtr(pb.Participant_HOME),
 							Name: "AS Monaco",
 						},
 						{
-							Type: pb.ParticipantType_AWAY,
+							Type: getParticipantTypePtr(pb.Participant_AWAY),
 							Name: "Crvena Zvezda",
 						},
 					},
@@ -155,15 +155,15 @@ func TestTransformEventsBasketball(t *testing.T) {
 					StartTime: timestamppb.New(time.Date(2024, 6, 30, 19, 0, 0, 0, time.UTC)),
 					Participants: []*pb.Participant{
 						{
-							Type: pb.ParticipantType_COMPETITOR,
+							Type: getParticipantTypePtr(pb.Participant_COMPETITOR),
 							Name: "Baskonia",
 						},
 						{
-							Type: pb.ParticipantType_COMPETITOR,
+							Type: getParticipantTypePtr(pb.Participant_COMPETITOR),
 							Name: "Basquet Girona",
 						},
 						{
-							Type: pb.ParticipantType_COMPETITOR,
+							Type: getParticipantTypePtr(pb.Participant_COMPETITOR),
 							Name: "Baxi Manresa",
 						},
 					},
@@ -231,4 +231,8 @@ func TestTransformEventsBasketball(t *testing.T) {
 
 func getStringPtr(s string) *string {
 	return &s
+}
+
+func getParticipantTypePtr(t pb.Participant_ParticipantType) *pb.Participant_ParticipantType {
+	return &t
 }

@@ -14,8 +14,9 @@ func getParticipants(event *model.Event) []*pb.Participant {
 			isMarketName(mr, mapping.OutrightMarketType) {
 			for _, mc := range mr.Children {
 				oc := &mc.Outcome
+				t := getParticipantType(oc.OutcomeMeaningMinorCode)
 				pts = append(pts, &pb.Participant{
-					Type: getParticipantType(oc.OutcomeMeaningMinorCode),
+					Type: &t,
 					Name: oc.Name,
 				})
 			}
@@ -28,13 +29,13 @@ func isMarketName(market *model.Market, name string) bool {
 	return market.TemplateMarketName == name
 }
 
-func getParticipantType(code string) pb.ParticipantType {
+func getParticipantType(code string) pb.Participant_ParticipantType {
 	switch code {
 	case model.HomeOutcomeCode:
-		return pb.ParticipantType_HOME
+		return pb.Participant_HOME
 	case model.AwayOutcomeCode:
-		return pb.ParticipantType_AWAY
+		return pb.Participant_AWAY
 	default:
-		return pb.ParticipantType_COMPETITOR
+		return pb.Participant_COMPETITOR
 	}
 }

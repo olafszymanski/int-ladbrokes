@@ -94,7 +94,7 @@ func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) 
 	}
 
 	name := event.Name
-	if len(pts) > 0 && pts[0].Type != pb.ParticipantType_COMPETITOR {
+	if len(pts) > 0 && *pts[0].Type != pb.Participant_COMPETITOR {
 		if len(pts) > 2 {
 			return nil, nil, fmt.Errorf("%w: expected 2", ErrTooManyParticipants)
 		}
