@@ -126,7 +126,7 @@ func main() {
 		}()
 		wg.Wait()
 
-		logrus.WithField("duration", time.Since(t)).Info("Events fetched")
+		logrus.WithField("duration", time.Since(t)).Info("events fetched")
 	}
 }
 

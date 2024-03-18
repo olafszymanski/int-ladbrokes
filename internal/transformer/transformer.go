@@ -68,7 +68,7 @@ func transformEvents(eventsRoot *model.EventsRoot) ([]*pb.Event, error) {
 		}
 	}
 	if len(umtps) > 0 {
-		logrus.WithField("unhandled_market_types", stringifyMarketTypes(umtps)).Warn("Found unhandled market types")
+		logrus.WithField("unhandled_market_types", stringifyMarketTypes(umtps)).Warn("found unhandled market types")
 	}
 	return evs, nil
 }
@@ -118,7 +118,7 @@ func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) 
 func isClassValid(class *model.Class) bool {
 	a, err := strconv.ParseBool(class.IsActive)
 	if err != nil {
-		logrus.WithField("class", class).Error("Failed to parse class availability")
+		logrus.WithField("class", class).Error("failed to parse class availability")
 		a = false
 	}
 	return a
