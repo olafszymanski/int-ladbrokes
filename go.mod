@@ -4,7 +4,7 @@ go 1.21.6
 
 require (
 	github.com/caarlos0/env/v10 v10.0.0
-	github.com/olafszymanski/int-sdk v0.0.0-20240318231112-2ef74210d292
+	github.com/olafszymanski/int-sdk v0.0.0-20240319225932-aedbec226811
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.7.0
 	google.golang.org/protobuf v1.32.0

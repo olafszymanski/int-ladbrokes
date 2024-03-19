@@ -7,7 +7,7 @@ import (
 )
 
 // getMarkets returns a slice of markets for the given event, unhandled market types and an error if any
-func getMarkets(event *model.Event) ([]*pb.Market, map[string]struct{}, error) {
+func getMarkets(event *model.Event, participantsOutcomeTypes map[string]pb.Outcome_OutcomeType) ([]*pb.Market, map[string]struct{}, error) {
 	var (
 		markets              []*pb.Market
 		unhandledMarketTypes = map[string]struct{}{}
@@ -21,7 +21,7 @@ func getMarkets(event *model.Event) ([]*pb.Market, map[string]struct{}, error) {
 			continue
 		}
 
-		oc, err := getOutcomes(mr)
+		oc, err := getOutcomes(mr, participantsOutcomeTypes)
 		if err != nil {
 			return nil, nil, err
 		}

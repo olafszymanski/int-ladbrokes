@@ -17,7 +17,7 @@ var (
 	ErrParseFixedOddsAvailability = fmt.Errorf("failed to parse fixed odds availability")
 )
 
-func getOutcomes(market *model.Market) ([]*pb.Outcome, error) {
+func getOutcomes(market *model.Market, participantsOutcomeTypes map[string]pb.Outcome_OutcomeType) ([]*pb.Outcome, error) {
 	var (
 		isSpread = isMarketName(market, mapping.Spread1stHalfMarketType) || isMarketName(market, mapping.Spread1stQuarterMarketType)
 		points   *float64
@@ -56,8 +56,7 @@ func getOutcomes(market *model.Market) ([]*pb.Outcome, error) {
 			return nil, fmt.Errorf("%w: %s", ErrParseFixedOddsAvailability, err)
 		}
 
-		outcomes = append(outcomes, &pb.Outcome{
-			Name:   oc.Name,
+		o := &pb.Outcome{
 			Points: points,
 			Odds: &pb.Odds{
 				Decimal:     dec,
@@ -67,7 +66,16 @@ func getOutcomes(market *model.Market) ([]*pb.Outcome, error) {
 				IsFixed:     foav,
 			},
 			IsAvailable: ocav,
-		})
+		}
+
+		if t, ok := mapping.OutcomeTypes[oc.Name]; ok {
+			o.Type = &t
+		}
+		if t, ok := participantsOutcomeTypes[oc.Name]; ok {
+			o.Type = &t
+		}
+
+		outcomes = append(outcomes, o)
 	}
 	return outcomes, nil
 }

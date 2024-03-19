@@ -88,7 +88,8 @@ func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) 
 		return nil, nil, fmt.Errorf("%w: %s", ErrParseTime, err)
 	}
 
-	mks, umtps, err := getMarkets(event)
+	otm := mapping.MapParticipantsToOutcomeTypes(pts)
+	mks, umtps, err := getMarkets(event, otm)
 	if err != nil {
 		return nil, nil, err
 	}
