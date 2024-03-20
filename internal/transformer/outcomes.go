@@ -56,7 +56,14 @@ func getOutcomes(market *model.Market, participantsOutcomeTypes map[string]pb.Ou
 			return nil, fmt.Errorf("%w: %s", ErrParseFixedOddsAvailability, err)
 		}
 
+		tp, err := getOutcomeType(oc.Name, participantsOutcomeTypes)
+		if err != nil {
+			logrus.Error(err.Error())
+			continue
+		}
+
 		o := &pb.Outcome{
+			Type:   tp,
 			Points: points,
 			Odds: &pb.Odds{
 				Decimal:     dec,
@@ -67,12 +74,9 @@ func getOutcomes(market *model.Market, participantsOutcomeTypes map[string]pb.Ou
 			},
 			IsAvailable: ocav,
 		}
-
-		if t, ok := mapping.OutcomeTypes[oc.Name]; ok {
-			o.Type = &t
-		}
-		if t, ok := participantsOutcomeTypes[oc.Name]; ok {
-			o.Type = &t
+		if *o.Type == pb.Outcome_COMPETITOR {
+			n := oc.Name
+			o.Name = &n
 		}
 
 		outcomes = append(outcomes, o)
@@ -128,4 +132,16 @@ func getOutcomeAvailability(outcome *model.Outcome) (bool, error) {
 		return false, fmt.Errorf("%w: %s", ErrParseOutcomeAvailability, err)
 	}
 	return dp && outcome.OutcomeStatusCode != model.SuspendedOutcomeCode, nil
+}
+
+func getOutcomeType(outcomeName string, participantsOutcomeTypes map[string]pb.Outcome_OutcomeType) (*pb.Outcome_OutcomeType, error) {
+	var tp pb.Outcome_OutcomeType
+	if t, ok := mapping.OutcomeTypes[outcomeName]; ok {
+		tp = t
+		return &tp, nil
+	} else if t, ok := participantsOutcomeTypes[outcomeName]; ok {
+		tp = t
+		return &tp, nil
+	}
+	return nil, fmt.Errorf("failed to map outcome type for: %s", outcomeName)
 }

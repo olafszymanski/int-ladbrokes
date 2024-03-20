@@ -3,10 +3,16 @@ package mapping
 import "github.com/olafszymanski/int-sdk/integration/pb"
 
 const (
-	MoneyLineMarketType                     = "Money Line"
-	Moneyline1stQuarterMarketType           = "Quarter Money Line"
-	Moneyline1stHalfMarketType              = "Half Money Line"
-	OutrightMarketType                      = "Outright"
+	MatchBettingMarketType = "Match Betting"
+
+	MoneyLineMarketType           = "Money Line"
+	Moneyline1stQuarterMarketType = "Quarter Money Line"
+	Moneyline1stHalfMarketType    = "Half Money Line"
+
+	RaceToXPointsMarketType = "Race to X points"
+
+	OutrightMarketType = "Outright"
+
 	TotalPointsMarketType                   = "Total Points"
 	TotalPointsOddEvenMarketType            = "Total points - odd/even"
 	TotalPoints1stQuarterMarketType         = "Quarter Total Points"
@@ -19,15 +25,27 @@ const (
 	TotalPointsAwayTeamMarketType           = "Away team total points"
 	TotalPointsAwayTeam1stQuarterMarketType = "Quarter Away Team Total Points"
 	TotalPointsAwayTeam1stHalfMarketType    = "Half Away Team Total Points"
-	Spread1stQuarterMarketType              = "Quarter Spread"
-	Spread1stHalfMarketType                 = "Half Spread"
+
+	Spread1stQuarterMarketType = "Quarter Spread"
+	Spread1stHalfMarketType    = "Half Spread"
+
+	PlayerTotalPointsMarketType    = "Player - Total Points"
+	PlayerTotalAssistsMarketType   = "Player - Total Assists"
+	PlayerTotalReboundsMarketType  = "Player - Total Rebounds"
+	PlayerTotal3PointersMarketType = "Player - Total 3 Pointers"
 )
 
 var MarketTypes = map[string]pb.MarketType{
-	MoneyLineMarketType:                     pb.MarketType_MONEYLINE,
-	Moneyline1stQuarterMarketType:           pb.MarketType_MONEYLINE_1ST_QUARTER,
-	Moneyline1stHalfMarketType:              pb.MarketType_MONEYLINE_1ST_HALF,
-	OutrightMarketType:                      pb.MarketType_OUTRIGHT,
+	MatchBettingMarketType: pb.MarketType_MATCH_BETTING,
+
+	MoneyLineMarketType:           pb.MarketType_MONEYLINE,
+	Moneyline1stQuarterMarketType: pb.MarketType_MONEYLINE_1ST_QUARTER,
+	Moneyline1stHalfMarketType:    pb.MarketType_MONEYLINE_1ST_HALF,
+
+	RaceToXPointsMarketType: pb.MarketType_RACE_TO_X_POINTS,
+
+	OutrightMarketType: pb.MarketType_OUTRIGHT,
+
 	TotalPointsMarketType:                   pb.MarketType_TOTAL_POINTS,
 	TotalPointsOddEvenMarketType:            pb.MarketType_TOTAL_POINTS_ODD_EVEN,
 	TotalPoints1stQuarterMarketType:         pb.MarketType_TOTAL_POINTS_1ST_QUARTER,
@@ -40,6 +58,12 @@ var MarketTypes = map[string]pb.MarketType{
 	TotalPointsAwayTeamMarketType:           pb.MarketType_TOTAL_POINTS_AWAY_TEAM,
 	TotalPointsAwayTeam1stQuarterMarketType: pb.MarketType_TOTAL_POINTS_AWAY_TEAM_1ST_QUARTER,
 	TotalPointsAwayTeam1stHalfMarketType:    pb.MarketType_TOTAL_POINTS_AWAY_TEAM_1ST_HALF,
-	Spread1stQuarterMarketType:              pb.MarketType_SPREAD_1ST_QUARTER,
-	Spread1stHalfMarketType:                 pb.MarketType_SPREAD_1ST_HALF,
+
+	Spread1stQuarterMarketType: pb.MarketType_SPREAD_1ST_QUARTER,
+	Spread1stHalfMarketType:    pb.MarketType_SPREAD_1ST_HALF,
+
+	PlayerTotalPointsMarketType:    pb.MarketType_PLAYER_TOTAL_POINTS,
+	PlayerTotalAssistsMarketType:   pb.MarketType_PLAYER_TOTAL_ASSISTS,
+	PlayerTotalReboundsMarketType:  pb.MarketType_PLAYER_TOTAL_REBOUNDS,
+	PlayerTotal3PointersMarketType: pb.MarketType_PLAYER_TOTAL_3_POINTERS,
 }

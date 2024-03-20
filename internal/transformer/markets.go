@@ -1,6 +1,8 @@
 package transformer
 
 import (
+	"strings"
+
 	"github.com/olafszymanski/int-ladbrokes/internal/mapping"
 	"github.com/olafszymanski/int-ladbrokes/internal/model"
 	"github.com/olafszymanski/int-sdk/integration/pb"
@@ -26,10 +28,27 @@ func getMarkets(event *model.Event, participantsOutcomeTypes map[string]pb.Outco
 			return nil, nil, err
 		}
 
-		markets = append(markets, &pb.Market{
+		m := &pb.Market{
 			Type:     &tp,
 			Outcomes: oc,
-		})
+		}
+		if isPlayerMarket(mr) {
+			n := getPlayerName(mr.Name)
+			m.Name = &n
+		}
+
+		markets = append(markets, m)
 	}
 	return markets, unhandledMarketTypes, nil
+}
+
+func isPlayerMarket(market *model.Market) bool {
+	return market.TemplateMarketName == mapping.PlayerTotalPointsMarketType ||
+		market.TemplateMarketName == mapping.PlayerTotalAssistsMarketType ||
+		market.TemplateMarketName == mapping.PlayerTotalReboundsMarketType ||
+		market.TemplateMarketName == mapping.PlayerTotal3PointersMarketType
+}
+
+func getPlayerName(marketName string) string {
+	return strings.Split(marketName, " (")[0]
 }

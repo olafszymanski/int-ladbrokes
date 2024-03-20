@@ -99,20 +99,22 @@ func TestTransformEventsBasketball(t *testing.T) {
 					StartTime: timestamppb.New(time.Date(2024, 3, 7, 18, 0, 0, 0, time.UTC)),
 					Participants: []*pb.Participant{
 						{
-							Type: getParticipantTypePtr(pb.Participant_HOME),
+							Type: pb.Participant_HOME.Enum(),
 							Name: "AS Monaco",
 						},
 						{
-							Type: getParticipantTypePtr(pb.Participant_AWAY),
+							Type: pb.Participant_AWAY.Enum(),
 							Name: "Crvena Zvezda",
 						},
 					},
 					Markets: []*pb.Market{
 						{
 							Type: pb.MarketType_MONEYLINE.Enum(),
+							Name: nil,
 							Outcomes: []*pb.Outcome{
 								{
-									Name:   "AS Monaco",
+									Type:   pb.Outcome_HOME.Enum(),
+									Name:   nil,
 									Points: nil,
 									Odds: &pb.Odds{
 										Decimal:     1.22,
@@ -124,13 +126,46 @@ func TestTransformEventsBasketball(t *testing.T) {
 									IsAvailable: true,
 								},
 								{
-									Name:   "Crvena Zvezda",
+									Type:   pb.Outcome_AWAY.Enum(),
+									Name:   nil,
 									Points: nil,
 									Odds: &pb.Odds{
 										Decimal:     3.7,
 										American:    "270",
 										Numerator:   "27",
 										Denominator: "10",
+										IsFixed:     true,
+									},
+									IsAvailable: true,
+								},
+							},
+						},
+						{
+							Type: pb.MarketType_PLAYER_TOTAL_POINTS.Enum(),
+							Name: getStringPtr("Donatas Motiejunas"),
+							Outcomes: []*pb.Outcome{
+								{
+									Type:   pb.Outcome_OVER.Enum(),
+									Name:   nil,
+									Points: getFloat64Ptr(7.5),
+									Odds: &pb.Odds{
+										Decimal:     1.83,
+										American:    "-121",
+										Numerator:   "83",
+										Denominator: "100",
+										IsFixed:     true,
+									},
+									IsAvailable: true,
+								},
+								{
+									Type:   pb.Outcome_UNDER.Enum(),
+									Name:   nil,
+									Points: getFloat64Ptr(7.5),
+									Odds: &pb.Odds{
+										Decimal:     1.83,
+										American:    "-121",
+										Numerator:   "83",
+										Denominator: "100",
 										IsFixed:     true,
 									},
 									IsAvailable: true,
@@ -155,24 +190,26 @@ func TestTransformEventsBasketball(t *testing.T) {
 					StartTime: timestamppb.New(time.Date(2024, 6, 30, 19, 0, 0, 0, time.UTC)),
 					Participants: []*pb.Participant{
 						{
-							Type: getParticipantTypePtr(pb.Participant_COMPETITOR),
+							Type: pb.Participant_COMPETITOR.Enum(),
 							Name: "Baskonia",
 						},
 						{
-							Type: getParticipantTypePtr(pb.Participant_COMPETITOR),
+							Type: pb.Participant_COMPETITOR.Enum(),
 							Name: "Basquet Girona",
 						},
 						{
-							Type: getParticipantTypePtr(pb.Participant_COMPETITOR),
+							Type: pb.Participant_COMPETITOR.Enum(),
 							Name: "Baxi Manresa",
 						},
 					},
 					Markets: []*pb.Market{
 						{
 							Type: pb.MarketType_OUTRIGHT.Enum(),
+							Name: nil,
 							Outcomes: []*pb.Outcome{
 								{
-									Name:   "Baskonia",
+									Type:   pb.Outcome_COMPETITOR.Enum(),
+									Name:   getStringPtr("Baskonia"),
 									Points: nil,
 									Odds: &pb.Odds{
 										Decimal:     34.0,
@@ -184,7 +221,8 @@ func TestTransformEventsBasketball(t *testing.T) {
 									IsAvailable: true,
 								},
 								{
-									Name:   "Basquet Girona",
+									Type:   pb.Outcome_COMPETITOR.Enum(),
+									Name:   getStringPtr("Basquet Girona"),
 									Points: nil,
 									Odds: &pb.Odds{
 										Decimal:     101.0,
@@ -196,7 +234,8 @@ func TestTransformEventsBasketball(t *testing.T) {
 									IsAvailable: true,
 								},
 								{
-									Name:   "Baxi Manresa",
+									Type:   pb.Outcome_COMPETITOR.Enum(),
+									Name:   getStringPtr("Baxi Manresa"),
 									Points: nil,
 									Odds: &pb.Odds{
 										Decimal:     101.0,
@@ -233,6 +272,6 @@ func getStringPtr(s string) *string {
 	return &s
 }
 
-func getParticipantTypePtr(t pb.Participant_ParticipantType) *pb.Participant_ParticipantType {
-	return &t
+func getFloat64Ptr(f float64) *float64 {
+	return &f
 }

@@ -137,6 +137,108 @@
                                     }
                                 ]
                             }
+                        },
+                        {
+                            "market": {
+                                "id": "808286384",
+                                "eventId": "243810572",
+                                "templateMarketId": "2321991",
+                                "templateMarketName": "Player - Total Points",
+                                "collectionIds": "82913,",
+                                "collectionNames": "Player Markets,",
+                                "marketMeaningMajorCode": "L",
+                                "marketMeaningMinorCode": "HL",
+                                "name": "Donatas Motiejunas (Mon) - Total Points",
+                                "isLpAvailable": "true",
+                                "rawHandicapValue": "7.5",
+                                "displayOrder": "100",
+                                "marketStatusCode": "A",
+                                "isActive": "true",
+                                "isDisplayed": "true",
+                                "fixedOddsAvail": "true",
+                                "siteChannels": "P,p,Q,R,C,I,M,",
+                                "liveServChannels": "sEVMKT0808286384,",
+                                "liveServChildrenChannels": "SEVMKT0808286384,",
+                                "priceTypeCodes": "LP,",
+                                "isBettable": "true",
+                                "isAvailable": "true",
+                                "maxAccumulators": "1",
+                                "minAccumulators": "1",
+                                "cashoutAvail": "N",
+                                "termsWithBet": "N",
+                                "children": [
+                                    {
+                                        "outcome": {
+                                            "id": "2284159346",
+                                            "marketId": "808286384",
+                                            "name": "Over",
+                                            "outcomeMeaningMajorCode": "HL",
+                                            "outcomeMeaningMinorCode": "H",
+                                            "displayOrder": "0",
+                                            "outcomeStatusCode": "A",
+                                            "isActive": "true",
+                                            "isDisplayed": "true",
+                                            "siteChannels": "P,p,Q,R,C,I,M,",
+                                            "fixedOddsAvail": "true",
+                                            "liveServChannels": "sSELCN2284159346,",
+                                            "liveServChildrenChannels": "SSELCN2284159346,",
+                                            "isAvailable": "true",
+                                            "cashoutAvail": "N",
+                                            "children": [
+                                                {
+                                                    "price": {
+                                                        "id": "250",
+                                                        "priceType": "LP",
+                                                        "priceNum": "83",
+                                                        "priceDen": "100",
+                                                        "priceDec": "1.83",
+                                                        "priceAmerican": "-121",
+                                                        "handicapValueDec": "7.5,",
+                                                        "rawHandicapValue": "7.5",
+                                                        "isActive": "true",
+                                                        "displayOrder": "1"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "outcome": {
+                                            "id": "2284159347",
+                                            "marketId": "808286384",
+                                            "name": "Under",
+                                            "outcomeMeaningMajorCode": "HL",
+                                            "outcomeMeaningMinorCode": "L",
+                                            "displayOrder": "0",
+                                            "outcomeStatusCode": "A",
+                                            "isActive": "true",
+                                            "isDisplayed": "true",
+                                            "siteChannels": "P,p,Q,R,C,I,M,",
+                                            "fixedOddsAvail": "true",
+                                            "liveServChannels": "sSELCN2284159347,",
+                                            "liveServChildrenChannels": "SSELCN2284159347,",
+                                            "isAvailable": "true",
+                                            "cashoutAvail": "N",
+                                            "children": [
+                                                {
+                                                    "price": {
+                                                        "id": "251",
+                                                        "priceType": "LP",
+                                                        "priceNum": "83",
+                                                        "priceDen": "100",
+                                                        "priceDec": "1.83",
+                                                        "priceAmerican": "-121",
+                                                        "handicapValueDec": "7.5,",
+                                                        "rawHandicapValue": "7.5",
+                                                        "isActive": "true",
+                                                        "displayOrder": "1"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
                         }
                     ]
                 }
