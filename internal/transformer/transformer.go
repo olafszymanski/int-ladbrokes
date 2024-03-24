@@ -75,6 +75,7 @@ func transformEvents(eventsRoot *model.EventsRoot) ([]*pb.Event, error) {
 
 func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) {
 	var (
+		eId = event.ID
 		stp = mapping.SportTypes[event.CategoryCode]
 		lg  = event.TypeName
 		pts = getParticipants(event)
@@ -106,6 +107,7 @@ func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) 
 
 	return &pb.Event{
 		// ID:           bookmaker.GenerateId(st, stp, lg, pts),
+		ExternalId:   &eId,
 		SportType:    stp,
 		Name:         name,
 		League:       lg,

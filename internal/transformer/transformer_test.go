@@ -93,10 +93,11 @@ func TestTransformEventsBasketball(t *testing.T) {
 			events: []*pb.Event{
 				{
 					// ID:          "1",
-					SportType: pb.SportType_BASKETBALL,
-					Name:      "AS Monaco vs Crvena Zvezda",
-					League:    "Euroleague Men",
-					StartTime: timestamppb.New(time.Date(2024, 3, 7, 18, 0, 0, 0, time.UTC)),
+					ExternalId: getStringPtr("243810572"),
+					SportType:  pb.SportType_BASKETBALL,
+					Name:       "AS Monaco vs Crvena Zvezda",
+					League:     "Euroleague Men",
+					StartTime:  timestamppb.New(time.Date(2024, 3, 7, 18, 0, 0, 0, time.UTC)),
 					Participants: []*pb.Participant{
 						{
 							Type: pb.Participant_HOME.Enum(),
@@ -184,10 +185,11 @@ func TestTransformEventsBasketball(t *testing.T) {
 			events: []*pb.Event{
 				{
 					// ID:          "1",
-					SportType: pb.SportType_BASKETBALL,
-					Name:      "2023/2024 Spanish ACB",
-					League:    "Spanish ACB",
-					StartTime: timestamppb.New(time.Date(2024, 6, 30, 19, 0, 0, 0, time.UTC)),
+					ExternalId: getStringPtr("241631428"),
+					SportType:  pb.SportType_BASKETBALL,
+					Name:       "2023/2024 Spanish ACB",
+					League:     "Spanish ACB",
+					StartTime:  timestamppb.New(time.Date(2024, 6, 30, 19, 0, 0, 0, time.UTC)),
 					Participants: []*pb.Participant{
 						{
 							Type: pb.Participant_COMPETITOR.Enum(),
