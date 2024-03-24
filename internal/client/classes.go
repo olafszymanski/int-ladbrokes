@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
@@ -17,7 +18,7 @@ import (
 const (
 	classesUrl        = "https://ss-aka-ori.ladbrokes.com/openbet-ssviewer/Drilldown/2.81/Class?translationLang=en&responseFormat=json&simpleFilter=class.isActive&simpleFilter=class.hasOpenEvent&simpleFilter=class.categoryId:equals:%v"
 	classesStorageKey = "%s_CLASSES"
-	classesTTL        = int64(5 * time.Second)
+	classesTTL        = 5 * time.Second
 )
 
 func (c *client) fetchClasses(sportType pb.SportType) ([]string, error) {
@@ -34,18 +35,19 @@ func (c *client) fetchClasses(sportType pb.SportType) ([]string, error) {
 	return transformer.TransformClasses(res.Body)
 }
 
-func (c *client) getClasses(sportType pb.SportType) (string, error) {
-	cls, err := c.storage.GetAny(classesStorageKey)
+func (c *client) getClasses(ctx context.Context, sportType pb.SportType) (string, error) {
+	cls, err := c.storage.Get(ctx, classesStorageKey)
 	if err != nil && errors.Is(err, storage.ErrNotFound) {
 		rawCls, err := c.fetchClasses(sportType)
 		if err != nil {
 			return "", err
 		}
 
-		cls = strings.Join(rawCls, ",")
+		cls = []byte(strings.Join(rawCls, ","))
 
 		go func() {
-			if err = c.storage.StoreAny(
+			if err = c.storage.Store(
+				ctx,
 				fmt.Sprintf(classesStorageKey, sportType),
 				cls,
 				classesTTL,
@@ -54,5 +56,5 @@ func (c *client) getClasses(sportType pb.SportType) (string, error) {
 			}
 		}()
 	}
-	return cls.(string), nil
+	return string(cls), nil
 }

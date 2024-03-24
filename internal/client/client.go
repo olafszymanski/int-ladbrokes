@@ -31,7 +31,7 @@ func NewClient(cfg *config.Config, storage storage.Storager) pb.IntegrationServe
 }
 
 func (c *client) GetLive(ctx context.Context, request *pb.Request) (*pb.Response, error) {
-	cls, err := c.getClasses(request.SportType)
+	cls, err := c.getClasses(ctx, request.SportType)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (c *client) GetLive(ctx context.Context, request *pb.Request) (*pb.Response
 }
 
 func (c *client) GetPreMatch(ctx context.Context, request *pb.Request) (*pb.Response, error) {
-	cls, err := c.getClasses(request.SportType)
+	cls, err := c.getClasses(ctx, request.SportType)
 	if err != nil {
 		return nil, err
 	}
