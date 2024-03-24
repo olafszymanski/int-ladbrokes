@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/olafszymanski/int-ladbrokes/internal/transformer"
+	"github.com/olafszymanski/int-ladbrokes/internal/transform"
 	"github.com/olafszymanski/int-sdk/httptls"
 	"github.com/olafszymanski/int-sdk/integration/pb"
 	"github.com/sirupsen/logrus"
@@ -67,7 +67,7 @@ func (c *client) fetchEvents(url string, timeout int) ([]*pb.Event, error) {
 	if res.Status != 200 {
 		return nil, fmt.Errorf("%w: %v", ErrUnexpectedStatusCode, res.Status)
 	}
-	return transformer.TransformEvents(res.Body)
+	return transform.TransformEvents(res.Body)
 }
 
 func getEventsUrl(url, classes string, currentTime time.Time, interval time.Duration, currentIteration, maxConcurrentRequests int) string {

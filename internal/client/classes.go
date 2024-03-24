@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/olafszymanski/int-ladbrokes/internal/mapping"
-	"github.com/olafszymanski/int-ladbrokes/internal/transformer"
+	"github.com/olafszymanski/int-ladbrokes/internal/transform"
 	"github.com/olafszymanski/int-sdk/httptls"
 	"github.com/olafszymanski/int-sdk/integration/pb"
 	"github.com/olafszymanski/int-sdk/storage"
@@ -32,7 +32,7 @@ func (c *client) fetchClasses(sportType pb.SportType) ([]string, error) {
 	if res.Status != 200 {
 		return nil, fmt.Errorf("%w: %v", ErrUnexpectedStatusCode, res.Status)
 	}
-	return transformer.TransformClasses(res.Body)
+	return transform.TransformClasses(res.Body)
 }
 
 func (c *client) getClasses(ctx context.Context, sportType pb.SportType) (string, error) {

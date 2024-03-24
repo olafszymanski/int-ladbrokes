@@ -1,11 +1,11 @@
-package transformer_test
+package transform_test
 
 import (
 	_ "embed"
 	"testing"
 	"time"
 
-	"github.com/olafszymanski/int-ladbrokes/internal/transformer"
+	"github.com/olafszymanski/int-ladbrokes/internal/transform"
 	"github.com/olafszymanski/int-sdk/integration/pb"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -43,49 +43,49 @@ func TestTransformEventsBasketball(t *testing.T) {
 			name:        "empty data",
 			data:        []byte{},
 			events:      nil,
-			expectedErr: transformer.ErrDecodeResponse,
+			expectedErr: transform.ErrDecodeResponse,
 		},
 		{
 			name:        "invalid data",
 			data:        basketballInvalidData,
 			events:      nil,
-			expectedErr: transformer.ErrDecodeResponse,
+			expectedErr: transform.ErrDecodeResponse,
 		},
 		{
 			name:        "empty start time",
 			data:        basketballEmptyStartTimeData,
 			events:      nil,
-			expectedErr: transformer.ErrParseTime,
+			expectedErr: transform.ErrParseTime,
 		},
 		{
 			name:        "invalid start time",
 			data:        basketballInvalidStartTimeData,
 			events:      nil,
-			expectedErr: transformer.ErrParseTime,
+			expectedErr: transform.ErrParseTime,
 		},
 		{
 			name:        "too many participants",
 			data:        basketballTooManyParticipantsData,
 			events:      nil,
-			expectedErr: transformer.ErrTooManyParticipants,
+			expectedErr: transform.ErrTooManyParticipants,
 		},
 		{
 			name:        "invalid points from market",
 			data:        basketballInvalidPointsFromMarketData,
 			events:      nil,
-			expectedErr: transformer.ErrParsePoints,
+			expectedErr: transform.ErrParsePoints,
 		},
 		{
 			name:        "invalid points from price",
 			data:        basketballInvalidPointsFromPriceData,
 			events:      nil,
-			expectedErr: transformer.ErrParsePoints,
+			expectedErr: transform.ErrParsePoints,
 		},
 		{
 			name:        "invalid fixed odds availability",
 			data:        basketballInvalidFixedPointsAvailabilityData,
 			events:      nil,
-			expectedErr: transformer.ErrParseFixedOddsAvailability,
+			expectedErr: transform.ErrParseFixedOddsAvailability,
 		},
 		{
 			name: "success",
@@ -263,7 +263,7 @@ func TestTransformEventsBasketball(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			evs, err := transformer.TransformEvents(tt.data)
+			evs, err := transform.TransformEvents(tt.data)
 			require.ErrorIs(t, err, tt.expectedErr)
 			require.Equal(t, tt.events, evs)
 		})

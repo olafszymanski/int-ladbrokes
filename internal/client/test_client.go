@@ -3,7 +3,7 @@ package client
 import (
 	"context"
 
-	"github.com/olafszymanski/int-ladbrokes/internal/transformer"
+	"github.com/olafszymanski/int-ladbrokes/internal/transform"
 	"github.com/olafszymanski/int-sdk/integration/pb"
 )
 
@@ -24,14 +24,14 @@ func NewTestClient(config *TestClientConfig) pb.IntegrationServer {
 }
 
 func (c *testClient) GetLive(ctx context.Context, request *pb.Request) (*pb.Response, error) {
-	evs, err := transformer.TransformEvents(c.config.LiveInput)
+	evs, err := transform.TransformEvents(c.config.LiveInput)
 	return &pb.Response{
 		Events: evs,
 	}, err
 }
 
 func (c *testClient) GetPreMatch(ctx context.Context, request *pb.Request) (*pb.Response, error) {
-	evs, err := transformer.TransformEvents(c.config.PreMatchInput)
+	evs, err := transform.TransformEvents(c.config.PreMatchInput)
 	return &pb.Response{
 		Events: evs,
 	}, err

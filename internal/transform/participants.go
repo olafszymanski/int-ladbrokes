@@ -1,4 +1,4 @@
-package transformer
+package transform
 
 import (
 	"github.com/olafszymanski/int-ladbrokes/internal/mapping"
