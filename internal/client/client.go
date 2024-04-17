@@ -8,6 +8,7 @@ import (
 	"github.com/olafszymanski/int-sdk/httptls"
 	"github.com/olafszymanski/int-sdk/integration/pb"
 	"github.com/olafszymanski/int-sdk/storage"
+	"google.golang.org/protobuf/proto"
 )
 
 var (
@@ -31,25 +32,33 @@ func NewClient(cfg *config.Config, storage storage.Storager) pb.IntegrationServe
 }
 
 func (c *client) GetLive(ctx context.Context, request *pb.Request) (*pb.Response, error) {
-	cls, err := c.getClasses(ctx, request.SportType)
+	evs, err := c.storage.GetHashAll(ctx, fmt.Sprintf("LIVE_EVENTS_%s", request.SportType.String()))
 	if err != nil {
 		return nil, err
 	}
-
-	evs, err := c.getEvents(liveEventsUrl, cls, c.config.MaxLiveEventsConcurrentRequests, c.config.LiveEventsRequestTimeout)
-	return &pb.Response{
-		Events: evs,
-	}, err
+	rsp := &pb.Response{
+		Events: make([]*pb.Event, 0, len(evs)),
+	}
+	ev := &pb.Event{}
+	for _, e := range evs {
+		proto.Unmarshal(e, ev)
+		rsp.Events = append(rsp.Events, ev)
+	}
+	return rsp, nil
 }
 
 func (c *client) GetPreMatch(ctx context.Context, request *pb.Request) (*pb.Response, error) {
-	cls, err := c.getClasses(ctx, request.SportType)
+	evs, err := c.storage.GetHashAll(ctx, fmt.Sprintf("PRE_MATCH_EVENTS_%s", request.SportType.String()))
 	if err != nil {
 		return nil, err
 	}
-
-	evs, err := c.getEvents(preMatchEventsUrl, cls, c.config.MaxPreMatchEventsConcurrentRequests, c.config.PreMatchEventsRequestTimeout)
-	return &pb.Response{
-		Events: evs,
-	}, err
+	rsp := &pb.Response{
+		Events: make([]*pb.Event, 0, len(evs)),
+	}
+	ev := &pb.Event{}
+	for _, e := range evs {
+		proto.Unmarshal(e, ev)
+		rsp.Events = append(rsp.Events, ev)
+	}
+	return rsp, nil
 }
