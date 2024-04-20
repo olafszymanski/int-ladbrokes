@@ -98,6 +98,7 @@ func TestTransformEventsBasketball(t *testing.T) {
 					Name:       "AS Monaco vs Crvena Zvezda",
 					League:     "Euroleague Men",
 					StartTime:  timestamppb.New(time.Date(2024, 3, 7, 18, 0, 0, 0, time.UTC)),
+					IsLive:     true,
 					Participants: []*pb.Participant{
 						{
 							Type: pb.Participant_HOME.Enum(),

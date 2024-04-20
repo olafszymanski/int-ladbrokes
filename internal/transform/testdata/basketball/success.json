@@ -14,6 +14,7 @@
                     "eventSortCode": "MTCH",
                     "startTime": "2024-03-07T18:00:00Z",
                     "rawIsOffCode": "-",
+                    "isStarted": "true",
                     "classId": "25",
                     "typeId": "63",
                     "sportId": "6",
