@@ -76,6 +76,7 @@ type Event struct {
 	StartTime                string `json:"startTime"`
 	SuspendAtTime            string `json:"suspendAtTime"`
 	RawIsOffCode             string `json:"rawIsOffCode"`
+	IsStarted                string `json:"isStarted"`
 	ClassID                  string `json:"classId"`
 	TypeID                   string `json:"typeId"`
 	SportID                  string `json:"sportId"`

@@ -18,6 +18,7 @@ var (
 	ErrDecodeResponse      = fmt.Errorf("decoding response failed")
 	ErrParseTime           = fmt.Errorf("parsing time failed")
 	ErrTooManyParticipants = fmt.Errorf("too many participants")
+	ErrParseBool           = fmt.Errorf("parsing bool failed")
 )
 
 func TransformClasses(rawData []byte) ([]string, error) {
@@ -103,7 +104,12 @@ func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) 
 		name = fmt.Sprintf("%s vs %s", pts[0].Name, pts[1].Name)
 	}
 
-	l := getEventLink(event)
+	live, err := isLive(event.IsStarted)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	link := getEventLink(event)
 
 	return &pb.Event{
 		// ID:           bookmaker.GenerateId(st, stp, lg, pts),
@@ -112,9 +118,10 @@ func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) 
 		Name:         name,
 		League:       lg,
 		StartTime:    timestamppb.New(sti),
+		IsLive:       live,
 		Participants: pts,
 		Markets:      mks,
-		Link:         &l,
+		Link:         &link,
 	}, umtps, nil
 }
 
@@ -159,4 +166,15 @@ func normalizeLinkPart(part string) string {
 	p = strings.ReplaceAll(p, "/", "-")
 	p = strings.ToLower(p)
 	return p
+}
+
+func isLive(isStarted string) (bool, error) {
+	if isStarted == "" {
+		return false, nil
+	}
+	l, err := strconv.ParseBool(isStarted)
+	if err != nil {
+		return false, fmt.Errorf("%w: %s", ErrParseBool, err)
+	}
+	return l, nil
 }
