@@ -14,7 +14,10 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-const preMatchEventsStorageKey = "PRE_MATCH_EVENTS_%s"
+const (
+	liveEventsStorageKey     = "LIVE_EVENTS_%s"
+	preMatchEventsStorageKey = "PRE_MATCH_EVENTS_%s"
+)
 
 var (
 	ErrRequest              = fmt.Errorf("request failed")
@@ -53,10 +56,10 @@ func (p *Poller) Run(ctx context.Context, sportType pb.SportType) error {
 			go func() {
 				cls, err := p.pollClasses(sportType)
 				if err != nil {
-					logger.WithError(err).Error("fetching classes failed")
+					logger.WithError(err).Error("polling classes failed")
 				}
 				if len(cls) == 0 {
-					logger.Warn("no pre-match events fetched")
+					logger.Warn("no classes polled")
 					return
 				}
 				classesCh <- cls
@@ -64,7 +67,7 @@ func (p *Poller) Run(ctx context.Context, sportType pb.SportType) error {
 
 			select {
 			case cls := <-classesCh:
-				logger.WithField("classes_length", len(cls)).Debug("classes fetched")
+				logger.WithField("classes_length", len(cls)).Debug("classes polled")
 				if err := p.storage.Store(ctx, fmt.Sprintf(classesStorageKey, sportType), cls, 0); err != nil {
 					errCh <- err
 					return
@@ -78,10 +81,14 @@ func (p *Poller) Run(ctx context.Context, sportType pb.SportType) error {
 
 	go func() {
 		var (
-			eventsMapCh = make(chan map[string]any)
-			startTime   time.Time
+			liveEventsMapCh     = make(chan map[string]any)
+			preMatchEventsMapCh = make(chan map[string]any)
+			startTime           time.Time
 		)
-		defer close(eventsMapCh)
+		defer func() {
+			close(liveEventsMapCh)
+			close(preMatchEventsMapCh)
+		}()
 		for {
 			cls, err := p.storage.Get(ctx, fmt.Sprintf(classesStorageKey, sportType))
 			if err != nil && !errors.Is(err, storage.ErrNotFound) {
@@ -89,37 +96,45 @@ func (p *Poller) Run(ctx context.Context, sportType pb.SportType) error {
 				return
 			}
 			if len(cls) == 0 {
-				logger.WithError(err).Error("skipping fetching pre-match events, classes not found")
+				logger.WithError(err).Error("skipping polling events, classes not found")
 			} else {
 				startTime = time.Now()
 				go func() {
 					evs, err := p.pollEvents(cls)
 					if err != nil {
-						logger.WithError(err).Error("fetching pre-match events failed")
+						logger.WithError(err).Error("polling events failed")
 					}
 					if len(evs) == 0 {
-						logger.Warn("no pre-match events fetched")
+						logger.Warn("no events polled")
 						return
 					}
-					evsMap, err := getEventsMap(evs)
+					liEvsMap, pmEvsMap, err := getEventsMaps(evs)
 					if err != nil {
 						errCh <- err
 						return
 					}
-					eventsMapCh <- evsMap
+					liveEventsMapCh <- liEvsMap
+					preMatchEventsMapCh <- pmEvsMap
 				}()
 			}
 
 			select {
-			case evs := <-eventsMapCh:
-				logger.WithField("events_length", len(evs)).Debug("pre-match events fetched")
+			case evs := <-liveEventsMapCh:
+				logger.WithField("events_length", len(evs)).Debug("live events polled")
+				if err := p.storage.StoreHash(ctx, fmt.Sprintf(liveEventsStorageKey, sportType), evs); err != nil {
+					errCh <- err
+					return
+				}
+				<-time.After(p.config.Events.RequestInterval - time.Since(startTime))
+			case evs := <-preMatchEventsMapCh:
+				logger.WithField("events_length", len(evs)).Debug("pre-match events polled")
 				if err := p.storage.StoreHash(ctx, fmt.Sprintf(preMatchEventsStorageKey, sportType), evs); err != nil {
 					errCh <- err
 					return
 				}
-				<-time.After(p.config.PreMatch.RequestInterval - time.Since(startTime))
-			case <-time.After(p.config.PreMatch.RequestInterval):
-				logger.Warn("pre-match events polling took longer than expected")
+				<-time.After(p.config.Events.RequestInterval - time.Since(startTime))
+			case <-time.After(p.config.Events.RequestInterval):
+				logger.Warn("events polling took longer than expected")
 			}
 		}
 	}()
@@ -130,15 +145,20 @@ func (p *Poller) Run(ctx context.Context, sportType pb.SportType) error {
 	return nil
 }
 
-func getEventsMap(events []*pb.Event) (map[string]any, error) {
-	evs := make(map[string]any)
+// returns two maps: one for live events and one for pre-match events
+func getEventsMaps(events []*pb.Event) (map[string]any, map[string]any, error) {
+	liEvs, pmEvs := make(map[string]any), make(map[string]any)
 	for _, e := range events {
 		b, err := proto.Marshal(e)
 		if err != nil {
-			return nil, fmt.Errorf("%w: %s", ErrMarshalEvent, err)
+			return nil, nil, fmt.Errorf("%w: %s", ErrMarshalEvent, err)
 		}
 		// TODO: Later change it to use e.Id
-		evs[*e.ExternalId] = b
+		if e.IsLive {
+			liEvs[*e.ExternalId] = b
+		} else {
+			pmEvs[*e.ExternalId] = b
+		}
 	}
-	return evs, nil
+	return liEvs, pmEvs, nil
 }
