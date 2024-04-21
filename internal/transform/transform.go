@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
-	"strings"
-	"time"
 
 	"github.com/olafszymanski/int-ladbrokes/internal/mapping"
 	"github.com/olafszymanski/int-ladbrokes/internal/model"
@@ -75,33 +73,9 @@ func transformEvents(eventsRoot *model.EventsRoot) ([]*pb.Event, error) {
 }
 
 func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) {
-	var (
-		eId = event.ID
-		stp = mapping.SportTypes[event.CategoryCode]
-		lg  = event.TypeName
-		pts = getParticipants(event)
-	)
-
-	if len(strings.TrimSpace(event.StartTime)) == 0 {
-		return nil, nil, fmt.Errorf("%w: empty start time", ErrParseTime)
-	}
-	sti, err := time.Parse(time.RFC3339, event.StartTime)
-	if err != nil {
-		return nil, nil, fmt.Errorf("%w: %s", ErrParseTime, err)
-	}
-
-	otm := mapping.MapParticipantsToOutcomeTypes(pts)
-	mks, umtps, err := getMarkets(event, otm)
+	st, err := getStartTime(event.StartTime)
 	if err != nil {
 		return nil, nil, err
-	}
-
-	name := event.Name
-	if len(pts) > 0 && *pts[0].Type != pb.Participant_COMPETITOR {
-		if len(pts) > 2 {
-			return nil, nil, fmt.Errorf("%w: expected 2", ErrTooManyParticipants)
-		}
-		name = fmt.Sprintf("%s vs %s", pts[0].Name, pts[1].Name)
 	}
 
 	live, err := isLive(event.IsStarted)
@@ -109,15 +83,33 @@ func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) 
 		return nil, nil, err
 	}
 
-	link := getEventLink(event)
+	pts, err := getParticipants(event)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	mks, umtps, err := getMarkets(
+		event,
+		mapping.MapParticipantsToOutcomeTypes(pts),
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	name, err := getName(event.Name, pts)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	link := getLink(event)
 
 	return &pb.Event{
 		// ID:           bookmaker.GenerateId(st, stp, lg, pts),
-		ExternalId:   &eId,
-		SportType:    stp,
+		ExternalId:   &event.ID,
+		SportType:    mapping.SportTypes[event.CategoryCode],
 		Name:         name,
-		League:       lg,
-		StartTime:    timestamppb.New(sti),
+		League:       event.TypeName,
+		StartTime:    timestamppb.New(st),
 		IsLive:       live,
 		Participants: pts,
 		Markets:      mks,
@@ -143,38 +135,15 @@ func isEventValid(event *model.Event) bool {
 }
 
 func stringifyMarketTypes(marketTypes map[string]struct{}) string {
-	var s string
+	var (
+		i int
+		s string
+	)
 	for k := range marketTypes {
-		s += k + ","
+		if i != len(marketTypes)-1 {
+			s += k + ","
+		}
+		i++
 	}
 	return s
-}
-
-func getEventLink(event *model.Event) string {
-	return fmt.Sprintf(
-		"https://sports.ladbrokes.com/event/%s/%s/%s/%s/%s/all-markets",
-		normalizeLinkPart(event.CategoryName),
-		normalizeLinkPart(event.ClassName),
-		normalizeLinkPart(event.TypeName),
-		normalizeLinkPart(event.Name),
-		event.ID,
-	)
-}
-
-func normalizeLinkPart(part string) string {
-	p := strings.ReplaceAll(part, " ", "-")
-	p = strings.ReplaceAll(p, "/", "-")
-	p = strings.ToLower(p)
-	return p
-}
-
-func isLive(isStarted string) (bool, error) {
-	if isStarted == "" {
-		return false, nil
-	}
-	l, err := strconv.ParseBool(isStarted)
-	if err != nil {
-		return false, fmt.Errorf("%w: %s", ErrParseBool, err)
-	}
-	return l, nil
 }
