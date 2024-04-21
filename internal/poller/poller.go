@@ -153,7 +153,6 @@ func getEventsMaps(events []*pb.Event) (map[string]any, map[string]any, error) {
 		if err != nil {
 			return nil, nil, fmt.Errorf("%w: %s", ErrMarshalEvent, err)
 		}
-		// TODO: Later change it to use e.Id
 		if e.IsLive {
 			liEvs[*e.ExternalId] = b
 		} else {
