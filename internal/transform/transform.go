@@ -67,12 +67,14 @@ func transformEvents(eventsRoot *model.EventsRoot) ([]*pb.Event, error) {
 		}
 	}
 	if len(umtps) > 0 {
-		logrus.WithField("unhandled_market_types", stringifyMarketTypes(umtps)).Warn("found unhandled market types")
+		// logrus.WithField("unhandled_market_types", stringifyMarketTypes(umtps)).Warn("found unhandled market types")
 	}
 	return evs, nil
 }
 
 func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) {
+	eId := event.ID
+
 	st, err := getStartTime(event.StartTime)
 	if err != nil {
 		return nil, nil, err
@@ -105,7 +107,7 @@ func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) 
 
 	return &pb.Event{
 		// ID:           bookmaker.GenerateId(st, stp, lg, pts),
-		ExternalId:   &event.ID,
+		ExternalId:   &eId,
 		SportType:    mapping.SportTypes[event.CategoryCode],
 		Name:         name,
 		League:       event.TypeName,
