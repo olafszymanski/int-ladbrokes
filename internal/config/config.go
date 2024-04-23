@@ -13,8 +13,8 @@ type Config struct {
 		RequestInterval time.Duration `env:"CLASSES_REQUEST_INTERVAL" envDefault:"5s"`
 	}
 	Events struct {
-		RequestTimeout  time.Duration `env:"PRE_MATCH_REQUEST_TIMEOUT" envDefault:"2s"`
-		RequestInterval time.Duration `env:"PRE_MATCH_REQUEST_INTERVAL" envDefault:"5000ms"`
+		RequestTimeout  time.Duration `env:"EVENTS_REQUEST_TIMEOUT" envDefault:"2s"`
+		RequestInterval time.Duration `env:"EVENTS_REQUEST_INTERVAL" envDefault:"5s"`
 	}
 }
 
