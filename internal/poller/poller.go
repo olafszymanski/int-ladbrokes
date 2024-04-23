@@ -96,7 +96,7 @@ func (p *Poller) Run(ctx context.Context, sportType pb.SportType) error {
 				return
 			}
 			if len(cls) == 0 {
-				logger.WithError(err).Error("skipping polling events, classes not found")
+				logger.WithError(err).Warn("skipping polling events, classes not found")
 			} else {
 				startTime = time.Now()
 				go func() {

@@ -11,18 +11,23 @@ import (
 )
 
 const (
-	eventsUrl = "https://ss-aka-ori.ladbrokes.com/openbet-ssviewer/Drilldown/2.81/EventToOutcomeForClass/%s?simpleFilter=event.startTime:greaterThanOrEqual:%s&translationLang=en&responseFormat=json&prune=event&prune=market&childCount=event&referenceEachWayTerms=true"
-)
+	eventsUrl = "https://ss-aka-ori.ladbrokes.com/openbet-ssviewer/Drilldown/2.81/EventToOutcomeForClass/%s?simpleFilter=event.startTime:greaterThanOrEqual:%s&translationLang=en&responseFormat=json&prune=event&prune=market&childCount=event"
 
-const lessThanFilter = "simpleFilter=event.startTime:lessThan:%s"
+	lessThanFilter = "simpleFilter=event.startTime:lessThan:%s"
+)
 
 var ErrMarshalEvent = fmt.Errorf("marshaling event failed")
 
-var intervalPeriods = []time.Duration{
-	4 * time.Hour,
-	4 * time.Hour,
-	8 * time.Hour,
-	12 * time.Hour,
+type timeRange struct {
+	start time.Duration
+	end   time.Duration
+}
+
+var timeRanges = []timeRange{
+	{-4 * time.Hour, 0},
+	{0, 8 * time.Hour},
+	{8 * time.Hour, 32 * time.Hour},
+	{32 * time.Hour, 0}, // last element will not have end time
 }
 
 func (p *Poller) pollEvents(classes []byte) ([]*pb.Event, error) {
@@ -32,8 +37,7 @@ func (p *Poller) pollEvents(classes []byte) ([]*pb.Event, error) {
 		events        = make([]*pb.Event, 0)
 		errCh         = make(chan error)
 		done          = make(chan struct{})
-		currentTime   = time.Now().UTC()
-		requestsCount = len(intervalPeriods)
+		requestsCount = len(timeRanges)
 	)
 	defer func() {
 		close(errCh)
@@ -46,15 +50,9 @@ func (p *Poller) pollEvents(classes []byte) ([]*pb.Event, error) {
 		go func() {
 			defer wg.Done()
 
-			if i == 0 {
-				currentTime = currentTime.Add(-intervalPeriods[i] * time.Hour)
-			} else {
-				currentTime = time.Now().UTC()
-			}
 			u := getEventsUrl(
 				classes,
-				currentTime,
-				intervalPeriods[i],
+				timeRanges,
 				i,
 				requestsCount,
 			)
@@ -92,13 +90,20 @@ func (p *Poller) getEvents(url string, timeout time.Duration) ([]*pb.Event, erro
 	return transform.TransformEvents(res.Body)
 }
 
-func getEventsUrl(classes []byte, currentTime time.Time, interval time.Duration, currentIteration, requestsCount int) string {
-	currentTime = currentTime.Add(interval * time.Duration(currentIteration))
+func getRequestTimes(timeRanges []timeRange, iteration int) (time.Time, time.Time) {
+	n := time.Now().UTC()
+	return n.Add(timeRanges[iteration].start), n.Add(timeRanges[iteration].end)
+}
 
-	fu := fmt.Sprintf("%s&%s", eventsUrl, lessThanFilter)
-	u := fmt.Sprintf(fu, classes, currentTime.Format(time.RFC3339), currentTime.Add(interval).Format(time.RFC3339))
-	if currentIteration == requestsCount-1 {
-		u = fmt.Sprintf(eventsUrl, classes, currentTime.Format(time.RFC3339))
+func getEventsUrl(classes []byte, timeRanges []timeRange, iteration, requestsCount int) string {
+	st, et := getRequestTimes(timeRanges, iteration)
+	if iteration == requestsCount-1 {
+		return fmt.Sprintf(eventsUrl, classes, st.Format(time.RFC3339))
 	}
-	return u
+	return fmt.Sprintf(
+		fmt.Sprintf("%s&%s", eventsUrl, lessThanFilter),
+		classes,
+		st.Format(time.RFC3339),
+		et.Format(time.RFC3339),
+	)
 }
