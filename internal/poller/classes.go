@@ -1,6 +1,7 @@
 package poller
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -9,6 +10,7 @@ import (
 	"github.com/olafszymanski/int-ladbrokes/internal/transform"
 	"github.com/olafszymanski/int-sdk/httptls"
 	"github.com/olafszymanski/int-sdk/integration/pb"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -16,7 +18,41 @@ const (
 	classesStorageKey = "CLASSES_%s"
 )
 
-func (p *Poller) pollClasses(sportType pb.SportType) ([]byte, error) {
+func (p *Poller) pollClasses(ctx context.Context, logger *logrus.Entry, sportType pb.SportType) {
+	var (
+		classesCh = make(chan []byte)
+		startTime time.Time
+	)
+	defer close(classesCh)
+	for {
+		startTime = time.Now()
+		go func() {
+			cls, err := p.fetchClasses(sportType)
+			if err != nil {
+				logger.WithError(err).Error("polling classes failed")
+			}
+			if len(cls) == 0 {
+				logger.Warn("no classes polled")
+				return
+			}
+			classesCh <- cls
+		}()
+
+		select {
+		case cls := <-classesCh:
+			logger.WithField("classes_length", len(cls)).Debug("classes polled")
+			if err := p.storage.Store(ctx, fmt.Sprintf(classesStorageKey, sportType), cls, 0); err != nil {
+				p.errCh <- err
+				return
+			}
+			<-time.After(p.config.Classes.RequestInterval - time.Since(startTime))
+		case <-time.After(p.config.Classes.RequestInterval):
+			logger.Warn("classes polling took longer than expected")
+		}
+	}
+}
+
+func (p *Poller) fetchClasses(sportType pb.SportType) ([]byte, error) {
 	rawCls, err := p.getClasses(sportType, p.config.Classes.RequestTimeout)
 	if err != nil {
 		return nil, err
