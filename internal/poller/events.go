@@ -40,24 +40,21 @@ var timeRanges = []timeRange{
 
 func (p *Poller) pollEvents(ctx context.Context, logger *logrus.Entry, sportType pb.SportType) error {
 	var (
-		startTime           time.Time
-		liveEventsMapCh     = make(chan map[string][]byte)
-		preMatchEventsMapCh = make(chan map[string][]byte)
+		startTime      time.Time
+		done           = make(chan struct{})
+		liveEvents     = make(map[string][]byte)
+		preMatchEvents = make(map[string][]byte)
 	)
-	defer func() {
-		close(liveEventsMapCh)
-		close(preMatchEventsMapCh)
-	}()
+	defer close(done)
 
 	for {
+		startTime = time.Now()
+
 		cls, err := p.storage.Get(ctx, fmt.Sprintf(classesStorageKey, sportType))
 		if err != nil && !errors.Is(err, storage.ErrNotFound) {
 			return err
 		}
-		if len(cls) == 0 {
-			logger.Warn("skipping polling events, classes not found")
-		} else {
-			startTime = time.Now()
+		if len(cls) > 0 {
 			go func() {
 				evs, err := p.fetchEvents(cls)
 				if err != nil {
@@ -68,27 +65,30 @@ func (p *Poller) pollEvents(ctx context.Context, logger *logrus.Entry, sportType
 					logger.Warn("no events polled")
 					return
 				}
-				liEvsMap, pmEvsMap, err := getEventsMaps(evs)
+				liveEvents, preMatchEvents, err = divideEvents(evs)
 				if err != nil {
 					logger.WithError(err).Error("converting events to maps failed")
 					return
 				}
-				liveEventsMapCh <- liEvsMap
-				preMatchEventsMapCh <- pmEvsMap
+				done <- struct{}{}
 			}()
+		} else {
+			continue
 		}
 
 		select {
-		case evs := <-liveEventsMapCh:
-			logger.WithField("events_length", len(evs)).Debug("live events polled")
-			if err := p.storage.StoreHashFields(ctx, fmt.Sprintf(liveEventsStorageKey, sportType), evs); err != nil {
-				return err
+		case <-done:
+			if len(liveEvents) > 0 {
+				logger.WithField("events_length", len(liveEvents)).Debug("live events polled")
+				if err := p.storage.StoreHashFields(ctx, fmt.Sprintf(liveEventsStorageKey, sportType), liveEvents); err != nil {
+					return err
+				}
 			}
-			<-time.After(p.config.Events.RequestInterval - time.Since(startTime))
-		case evs := <-preMatchEventsMapCh:
-			logger.WithField("events_length", len(evs)).Debug("pre-match events polled")
-			if err := p.storage.StoreHashFields(ctx, fmt.Sprintf(preMatchEventsStorageKey, sportType), evs); err != nil {
-				return err
+			if len(preMatchEvents) > 0 {
+				logger.WithField("events_length", len(preMatchEvents)).Debug("pre-match events polled")
+				if err := p.storage.StoreHashFields(ctx, fmt.Sprintf(preMatchEventsStorageKey, sportType), preMatchEvents); err != nil {
+					return err
+				}
 			}
 			<-time.After(p.config.Events.RequestInterval - time.Since(startTime))
 		case <-time.After(p.config.Events.RequestInterval):
@@ -175,8 +175,8 @@ func getEventsUrl(classes []byte, timeRanges []timeRange, iteration, requestsCou
 	)
 }
 
-// returns two maps: one for live events and one for pre-match events
-func getEventsMaps(events []*pb.Event) (map[string][]byte, map[string][]byte, error) {
+// divides events into two maps, one for live events and one for pre-match events
+func divideEvents(events []*pb.Event) (map[string][]byte, map[string][]byte, error) {
 	li, pm := make(map[string][]byte), make(map[string][]byte)
 	for _, e := range events {
 		b, err := proto.Marshal(e)
