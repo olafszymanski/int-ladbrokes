@@ -11,11 +11,6 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-var (
-	ErrRequest              = fmt.Errorf("request failed")
-	ErrUnexpectedStatusCode = fmt.Errorf("unexpected status code")
-)
-
 type client struct {
 	httpClient *httptls.HTTPClient
 	config     *config.Config

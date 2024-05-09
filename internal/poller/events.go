@@ -24,8 +24,6 @@ const (
 	preMatchEventsStorageKey = "PRE_MATCH_EVENTS_%s"
 )
 
-var ErrMarshalEvent = fmt.Errorf("marshaling event failed")
-
 type timeRange struct {
 	start time.Duration
 	end   time.Duration
@@ -181,7 +179,7 @@ func divideEvents(events []*pb.Event) (map[string][]byte, map[string][]byte, err
 	for _, e := range events {
 		b, err := proto.Marshal(e)
 		if err != nil {
-			return nil, nil, fmt.Errorf("%w: %s", ErrMarshalEvent, err)
+			return nil, nil, err
 		}
 		if e.IsLive {
 			li[*e.ExternalId] = b
