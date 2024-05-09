@@ -11,16 +11,12 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-var (
-	ErrRequest              = fmt.Errorf("request failed")
-	ErrUnexpectedStatusCode = fmt.Errorf("unexpected status code")
-)
+var ErrUnexpectedStatusCode = fmt.Errorf("unexpected status code")
 
 type Poller struct {
 	config     *config.Config
 	httpClient *httptls.HTTPClient
 	storage    storage.Storager
-	errCh      chan error
 }
 
 func NewPoller(config *config.Config, httpClient *httptls.HTTPClient, storage storage.Storager) (*Poller, error) {
@@ -28,19 +24,30 @@ func NewPoller(config *config.Config, httpClient *httptls.HTTPClient, storage st
 		config:     config,
 		httpClient: httpClient,
 		storage:    storage,
-		errCh:      make(chan error),
 	}, nil
 }
 
 func (p *Poller) Run(ctx context.Context, sportType pb.SportType) error {
-	defer close(p.errCh)
+	var (
+		logger = logrus.WithField("sport_type", sportType)
+		errCh  = make(chan error)
+	)
+	defer close(errCh)
 
-	logger := logrus.WithField("sport_type", sportType)
+	go func() {
+		if err := p.pollClasses(ctx, logger, sportType); err != nil {
+			errCh <- err
+			return
+		}
+	}()
+	go func() {
+		if err := p.pollEvents(ctx, logger, sportType); err != nil {
+			errCh <- err
+			return
+		}
+	}()
 
-	go p.pollClasses(ctx, logger, sportType)
-	go p.pollEvents(ctx, logger, sportType)
-
-	if err := <-p.errCh; err != nil {
+	if err := <-errCh; err != nil {
 		return err
 	}
 	return nil

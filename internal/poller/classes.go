@@ -18,18 +18,20 @@ const (
 	classesStorageKey = "CLASSES_%s"
 )
 
-func (p *Poller) pollClasses(ctx context.Context, logger *logrus.Entry, sportType pb.SportType) {
+func (p *Poller) pollClasses(ctx context.Context, logger *logrus.Entry, sportType pb.SportType) error {
 	var (
-		classesCh = make(chan []byte)
 		startTime time.Time
+		classesCh = make(chan []byte)
 	)
 	defer close(classesCh)
+
 	for {
 		startTime = time.Now()
 		go func() {
 			cls, err := p.fetchClasses(sportType)
 			if err != nil {
 				logger.WithError(err).Error("polling classes failed")
+				return
 			}
 			if len(cls) == 0 {
 				logger.Warn("no classes polled")
@@ -42,8 +44,7 @@ func (p *Poller) pollClasses(ctx context.Context, logger *logrus.Entry, sportTyp
 		case cls := <-classesCh:
 			logger.WithField("classes_length", len(cls)).Debug("classes polled")
 			if err := p.storage.Store(ctx, fmt.Sprintf(classesStorageKey, sportType), cls, 0); err != nil {
-				p.errCh <- err
-				return
+				return err
 			}
 			<-time.After(p.config.Classes.RequestInterval - time.Since(startTime))
 		case <-time.After(p.config.Classes.RequestInterval):
@@ -66,7 +67,7 @@ func (p *Poller) getClasses(sportType pb.SportType, timeout time.Duration) ([]st
 		httptls.WithTimeout(timeout),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s", ErrRequest, err)
+		return nil, err
 	}
 	if res.Status != 200 {
 		return nil, fmt.Errorf("%w: %v", ErrUnexpectedStatusCode, res.Status)
