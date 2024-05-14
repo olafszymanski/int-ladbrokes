@@ -78,13 +78,23 @@ func (p *Poller) pollEvents(ctx context.Context, logger *logrus.Entry, sportType
 		case <-done:
 			if len(liveEvents) > 0 {
 				logger.WithField("events_length", len(liveEvents)).Debug("live events polled")
-				if err := p.storage.StoreHashFields(ctx, fmt.Sprintf(liveEventsStorageKey, sportType), liveEvents); err != nil {
+
+				k := fmt.Sprintf(liveEventsStorageKey, sportType)
+				if err := p.removeUnavailableEvents(ctx, k, liveEvents); err != nil {
+					return err
+				}
+				if err := p.storage.StoreHashFields(ctx, k, liveEvents); err != nil {
 					return err
 				}
 			}
 			if len(preMatchEvents) > 0 {
 				logger.WithField("events_length", len(preMatchEvents)).Debug("pre-match events polled")
-				if err := p.storage.StoreHashFields(ctx, fmt.Sprintf(preMatchEventsStorageKey, sportType), preMatchEvents); err != nil {
+
+				k := fmt.Sprintf(preMatchEventsStorageKey, sportType)
+				if err := p.removeUnavailableEvents(ctx, k, preMatchEvents); err != nil {
+					return err
+				}
+				if err := p.storage.StoreHashFields(ctx, k, preMatchEvents); err != nil {
 					return err
 				}
 			}
@@ -155,6 +165,18 @@ func (p *Poller) getEvents(url string, timeout time.Duration) ([]*pb.Event, erro
 	return transform.TransformEvents(res.Body)
 }
 
+func (p *Poller) removeUnavailableEvents(ctx context.Context, hash string, events map[string][]byte) error {
+	k, err := p.storage.GetHashFieldKeys(ctx, hash)
+	if err != nil {
+		return err
+	}
+	ids := getMissingIds(k, events)
+	if err := p.storage.DeleteHashFields(ctx, hash, ids); err != nil {
+		return err
+	}
+	return nil
+}
+
 func getRequestTimes(timeRanges []timeRange, iteration int) (time.Time, time.Time) {
 	n := time.Now().UTC()
 	return n.Add(timeRanges[iteration].start), n.Add(timeRanges[iteration].end)
@@ -188,4 +210,14 @@ func divideEvents(events []*pb.Event) (map[string][]byte, map[string][]byte, err
 		}
 	}
 	return li, pm, nil
+}
+
+func getMissingIds(ids []string, events map[string][]byte) []string {
+	r := make([]string, 0)
+	for _, k := range ids {
+		if _, ok := events[k]; !ok {
+			r = append(r, k)
+		}
+	}
+	return r
 }
