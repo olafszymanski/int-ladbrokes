@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"maps"
 	"sync"
 	"time"
 
@@ -76,25 +77,35 @@ func (p *Poller) pollEvents(ctx context.Context, logger *logrus.Entry, sportType
 
 		select {
 		case <-done:
-			if len(liveEvents) > 0 {
-				logger.WithField("events_length", len(liveEvents)).Debug("live events polled")
+			logger.WithFields(logrus.Fields{
+				"live_events_length":      len(liveEvents),
+				"pre_match_events_length": len(preMatchEvents),
+			}).Debug("events polled")
 
-				k := fmt.Sprintf(liveEventsStorageKey, sportType)
-				if err := p.removeUnavailableEvents(ctx, k, liveEvents); err != nil {
+			if len(liveEvents) > 0 {
+				hash := fmt.Sprintf(liveEventsStorageKey, sportType)
+				ids, err := p.storage.GetHashFieldKeys(ctx, hash)
+				if err != nil {
 					return err
 				}
-				if err := p.storage.StoreHashFields(ctx, k, liveEvents); err != nil {
+				if err := p.removeUnavailableEvents(ctx, hash, ids, liveEvents); err != nil {
+					return err
+				}
+				// we store only new live events as we don't want to override data coming from websocket
+				if err := p.storeOnlyNewEvents(ctx, hash, ids, liveEvents); err != nil {
 					return err
 				}
 			}
 			if len(preMatchEvents) > 0 {
-				logger.WithField("events_length", len(preMatchEvents)).Debug("pre-match events polled")
-
-				k := fmt.Sprintf(preMatchEventsStorageKey, sportType)
-				if err := p.removeUnavailableEvents(ctx, k, preMatchEvents); err != nil {
+				hash := fmt.Sprintf(preMatchEventsStorageKey, sportType)
+				ids, err := p.storage.GetHashFieldKeys(ctx, hash)
+				if err != nil {
 					return err
 				}
-				if err := p.storage.StoreHashFields(ctx, k, preMatchEvents); err != nil {
+				if err := p.removeUnavailableEvents(ctx, hash, ids, preMatchEvents); err != nil {
+					return err
+				}
+				if err := p.storage.StoreHashFields(ctx, hash, preMatchEvents); err != nil {
 					return err
 				}
 			}
@@ -165,16 +176,20 @@ func (p *Poller) getEvents(url string, timeout time.Duration) ([]*pb.Event, erro
 	return transform.TransformEvents(res.Body)
 }
 
-func (p *Poller) removeUnavailableEvents(ctx context.Context, hash string, events map[string][]byte) error {
-	k, err := p.storage.GetHashFieldKeys(ctx, hash)
-	if err != nil {
-		return err
+func (p *Poller) removeUnavailableEvents(ctx context.Context, hash string, ids []string, events map[string][]byte) error {
+	i := getMissingEventsIds(ids, events)
+	if len(i) < 1 {
+		return nil
 	}
-	ids := getMissingIds(k, events)
-	if err := p.storage.DeleteHashFields(ctx, hash, ids); err != nil {
-		return err
+	return p.storage.DeleteHashFields(ctx, hash, i)
+}
+
+func (p *Poller) storeOnlyNewEvents(ctx context.Context, hash string, ids []string, events map[string][]byte) error {
+	e := getNewEvents(ids, events)
+	if len(e) < 1 {
+		return nil
 	}
-	return nil
+	return p.storage.StoreHashFields(ctx, hash, e)
 }
 
 func getRequestTimes(timeRanges []timeRange, iteration int) (time.Time, time.Time) {
@@ -212,7 +227,7 @@ func divideEvents(events []*pb.Event) (map[string][]byte, map[string][]byte, err
 	return li, pm, nil
 }
 
-func getMissingIds(ids []string, events map[string][]byte) []string {
+func getMissingEventsIds(ids []string, events map[string][]byte) []string {
 	r := make([]string, 0)
 	for _, k := range ids {
 		if _, ok := events[k]; !ok {
@@ -220,4 +235,17 @@ func getMissingIds(ids []string, events map[string][]byte) []string {
 		}
 	}
 	return r
+}
+
+func getNewEvents(ids []string, events map[string][]byte) map[string][]byte {
+	e := make(map[string][]byte)
+	maps.Copy(e, events)
+	for k := range events {
+		for _, id := range ids {
+			if k == id {
+				delete(e, k)
+			}
+		}
+	}
+	return e
 }
