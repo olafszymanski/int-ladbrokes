@@ -5,11 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"net/http"
 	"sync"
 	"time"
 
 	"github.com/olafszymanski/int-ladbrokes/internal/transform"
-	"github.com/olafszymanski/int-sdk/httptls"
+	sdkHttp "github.com/olafszymanski/int-sdk/http"
 	"github.com/olafszymanski/int-sdk/integration/pb"
 	"github.com/olafszymanski/int-sdk/storage"
 	"github.com/sirupsen/logrus"
@@ -166,7 +167,11 @@ func (p *Poller) fetchEvents(classes []byte) ([]*pb.Event, error) {
 }
 
 func (p *Poller) getEvents(url string, timeout time.Duration) ([]*pb.Event, error) {
-	res, err := p.httpClient.Get(url, httptls.WithTimeout(timeout))
+	res, err := p.httpClient.Do(&sdkHttp.Request{
+		Method:  http.MethodGet,
+		URL:     url,
+		Timeout: timeout,
+	})
 	if err != nil {
 		return nil, err
 	}

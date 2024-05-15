@@ -5,22 +5,22 @@ import (
 	"fmt"
 
 	"github.com/olafszymanski/int-ladbrokes/internal/config"
-	"github.com/olafszymanski/int-sdk/httptls"
+	"github.com/olafszymanski/int-sdk/http"
 	"github.com/olafszymanski/int-sdk/integration/pb"
 	"github.com/olafszymanski/int-sdk/storage"
 	"google.golang.org/protobuf/proto"
 )
 
 type client struct {
-	httpClient *httptls.HTTPClient
 	config     *config.Config
+	httpClient http.Doer
 	storage    storage.Storager
 	pb.UnimplementedIntegrationServer
 }
 
-func NewClient(cfg *config.Config, storage storage.Storager) pb.IntegrationServer {
+func NewClient(cfg *config.Config, httpClient http.Doer, storage storage.Storager) pb.IntegrationServer {
 	return &client{
-		httpClient: httptls.NewHTTPClient(),
+		httpClient: httpClient,
 		config:     cfg,
 		storage:    storage,
 	}

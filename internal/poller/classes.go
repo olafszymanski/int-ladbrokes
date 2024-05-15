@@ -3,12 +3,13 @@ package poller
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
 	"github.com/olafszymanski/int-ladbrokes/internal/mapping"
 	"github.com/olafszymanski/int-ladbrokes/internal/transform"
-	"github.com/olafszymanski/int-sdk/httptls"
+	sdkHttp "github.com/olafszymanski/int-sdk/http"
 	"github.com/olafszymanski/int-sdk/integration/pb"
 	"github.com/sirupsen/logrus"
 )
@@ -62,10 +63,11 @@ func (p *Poller) fetchClasses(sportType pb.SportType) ([]byte, error) {
 }
 
 func (p *Poller) getClasses(sportType pb.SportType, timeout time.Duration) ([]string, error) {
-	res, err := p.httpClient.Get(
-		fmt.Sprintf(classesUrl, mapping.SportTypesCodes[sportType]),
-		httptls.WithTimeout(timeout),
-	)
+	res, err := p.httpClient.Do(&sdkHttp.Request{
+		Method:  http.MethodGet,
+		URL:     fmt.Sprintf(classesUrl, mapping.SportTypesCodes[sportType]),
+		Timeout: timeout,
+	})
 	if err != nil {
 		return nil, err
 	}
