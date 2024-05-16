@@ -93,7 +93,7 @@ func TestTransformEventsBasketball(t *testing.T) {
 			events: []*pb.Event{
 				{
 					// ID:          "1",
-					ExternalId: getStringPtr("243810572"),
+					ExternalId: "243810572",
 					SportType:  pb.SportType_BASKETBALL,
 					Name:       "AS Monaco vs Crvena Zvezda",
 					League:     "Euroleague Men",
@@ -101,21 +101,21 @@ func TestTransformEventsBasketball(t *testing.T) {
 					IsLive:     true,
 					Participants: []*pb.Participant{
 						{
-							Type: pb.Participant_HOME.Enum(),
+							Type: pb.Participant_HOME,
 							Name: "AS Monaco",
 						},
 						{
-							Type: pb.Participant_AWAY.Enum(),
+							Type: pb.Participant_AWAY,
 							Name: "Crvena Zvezda",
 						},
 					},
 					Markets: []*pb.Market{
 						{
-							Type: pb.MarketType_MONEYLINE.Enum(),
+							Type: pb.MarketType_MONEYLINE,
 							Name: nil,
 							Outcomes: []*pb.Outcome{
 								{
-									Type:   pb.Outcome_HOME.Enum(),
+									Type:   pb.Outcome_HOME,
 									Name:   nil,
 									Points: nil,
 									Odds: &pb.Odds{
@@ -128,7 +128,7 @@ func TestTransformEventsBasketball(t *testing.T) {
 									IsAvailable: true,
 								},
 								{
-									Type:   pb.Outcome_AWAY.Enum(),
+									Type:   pb.Outcome_AWAY,
 									Name:   nil,
 									Points: nil,
 									Odds: &pb.Odds{
@@ -143,11 +143,11 @@ func TestTransformEventsBasketball(t *testing.T) {
 							},
 						},
 						{
-							Type: pb.MarketType_PLAYER_TOTAL_POINTS.Enum(),
+							Type: pb.MarketType_PLAYER_TOTAL_POINTS,
 							Name: getStringPtr("Donatas Motiejunas"),
 							Outcomes: []*pb.Outcome{
 								{
-									Type:   pb.Outcome_OVER.Enum(),
+									Type:   pb.Outcome_OVER,
 									Name:   nil,
 									Points: getFloat64Ptr(7.5),
 									Odds: &pb.Odds{
@@ -160,7 +160,7 @@ func TestTransformEventsBasketball(t *testing.T) {
 									IsAvailable: true,
 								},
 								{
-									Type:   pb.Outcome_UNDER.Enum(),
+									Type:   pb.Outcome_UNDER,
 									Name:   nil,
 									Points: getFloat64Ptr(7.5),
 									Odds: &pb.Odds{
@@ -175,7 +175,7 @@ func TestTransformEventsBasketball(t *testing.T) {
 							},
 						},
 					},
-					Link: getStringPtr("https://sports.ladbrokes.com/event/basketball/european-competitions/euroleague-men/as-monaco-v-crvena-zvezda/243810572/all-markets"),
+					Link: "https://sports.ladbrokes.com/event/basketball/european-competitions/euroleague-men/as-monaco-v-crvena-zvezda/243810572/all-markets",
 				},
 			},
 			expectedErr: nil,
@@ -186,32 +186,32 @@ func TestTransformEventsBasketball(t *testing.T) {
 			events: []*pb.Event{
 				{
 					// ID:          "1",
-					ExternalId: getStringPtr("241631428"),
+					ExternalId: "241631428",
 					SportType:  pb.SportType_BASKETBALL,
 					Name:       "2023/2024 Spanish ACB",
 					League:     "Spanish ACB",
 					StartTime:  timestamppb.New(time.Date(2024, 6, 30, 19, 0, 0, 0, time.UTC)),
 					Participants: []*pb.Participant{
 						{
-							Type: pb.Participant_COMPETITOR.Enum(),
+							Type: pb.Participant_COMPETITOR,
 							Name: "Baskonia",
 						},
 						{
-							Type: pb.Participant_COMPETITOR.Enum(),
+							Type: pb.Participant_COMPETITOR,
 							Name: "Basquet Girona",
 						},
 						{
-							Type: pb.Participant_COMPETITOR.Enum(),
+							Type: pb.Participant_COMPETITOR,
 							Name: "Baxi Manresa",
 						},
 					},
 					Markets: []*pb.Market{
 						{
-							Type: pb.MarketType_OUTRIGHT.Enum(),
+							Type: pb.MarketType_OUTRIGHT,
 							Name: nil,
 							Outcomes: []*pb.Outcome{
 								{
-									Type:   pb.Outcome_COMPETITOR.Enum(),
+									Type:   pb.Outcome_COMPETITOR,
 									Name:   getStringPtr("Baskonia"),
 									Points: nil,
 									Odds: &pb.Odds{
@@ -224,7 +224,7 @@ func TestTransformEventsBasketball(t *testing.T) {
 									IsAvailable: true,
 								},
 								{
-									Type:   pb.Outcome_COMPETITOR.Enum(),
+									Type:   pb.Outcome_COMPETITOR,
 									Name:   getStringPtr("Basquet Girona"),
 									Points: nil,
 									Odds: &pb.Odds{
@@ -237,7 +237,7 @@ func TestTransformEventsBasketball(t *testing.T) {
 									IsAvailable: true,
 								},
 								{
-									Type:   pb.Outcome_COMPETITOR.Enum(),
+									Type:   pb.Outcome_COMPETITOR,
 									Name:   getStringPtr("Baxi Manresa"),
 									Points: nil,
 									Odds: &pb.Odds{
@@ -252,7 +252,7 @@ func TestTransformEventsBasketball(t *testing.T) {
 							},
 						},
 					},
-					Link: getStringPtr("https://sports.ladbrokes.com/event/basketball/spanish/spanish-acb/2023-2024-spanish-acb/241631428/all-markets"),
+					Link: "https://sports.ladbrokes.com/event/basketball/spanish/spanish-acb/2023-2024-spanish-acb/241631428/all-markets",
 				},
 			},
 			expectedErr: nil,

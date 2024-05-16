@@ -29,8 +29,9 @@ func getMarkets(event *model.Event, participantsOutcomeTypes map[string]pb.Outco
 		}
 
 		m := &pb.Market{
-			Type:     &tp,
-			Outcomes: oc,
+			Type:       tp,
+			ExternalId: mr.ID,
+			Outcomes:   oc,
 		}
 		if isPlayerMarket(mr) {
 			n := getPlayerName(mr.Name)

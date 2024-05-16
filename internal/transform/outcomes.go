@@ -63,8 +63,9 @@ func getOutcomes(market *model.Market, participantsOutcomeTypes map[string]pb.Ou
 		}
 
 		o := &pb.Outcome{
-			Type:   tp,
-			Points: points,
+			Type:       tp,
+			ExternalId: oc.ID,
+			Points:     points,
 			Odds: &pb.Odds{
 				Decimal:     dec,
 				American:    oc.Children[0].Price.PriceAmerican,
@@ -74,7 +75,7 @@ func getOutcomes(market *model.Market, participantsOutcomeTypes map[string]pb.Ou
 			},
 			IsAvailable: ocav,
 		}
-		if *o.Type == pb.Outcome_COMPETITOR {
+		if o.Type == pb.Outcome_COMPETITOR {
 			n := oc.Name
 			o.Name = &n
 		}
@@ -134,14 +135,14 @@ func getOutcomeAvailability(outcome *model.Outcome) (bool, error) {
 	return dp && outcome.OutcomeStatusCode != model.SuspendedOutcomeCode, nil
 }
 
-func getOutcomeType(outcomeName string, participantsOutcomeTypes map[string]pb.Outcome_OutcomeType) (*pb.Outcome_OutcomeType, error) {
+func getOutcomeType(outcomeName string, participantsOutcomeTypes map[string]pb.Outcome_OutcomeType) (pb.Outcome_OutcomeType, error) {
 	var tp pb.Outcome_OutcomeType
 	if t, ok := mapping.OutcomeTypes[outcomeName]; ok {
 		tp = t
-		return &tp, nil
+		return tp, nil
 	} else if t, ok := participantsOutcomeTypes[outcomeName]; ok {
 		tp = t
-		return &tp, nil
+		return tp, nil
 	}
-	return nil, fmt.Errorf("failed to map outcome type for: %s", outcomeName)
+	return tp, fmt.Errorf("failed to map outcome type for: %s", outcomeName)
 }

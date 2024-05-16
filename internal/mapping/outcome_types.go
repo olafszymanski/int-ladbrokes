@@ -17,7 +17,7 @@ func MapParticipantsToOutcomeTypes(participants []*pb.Participant) map[string]pb
 	pts := make(map[string]pb.Outcome_OutcomeType, len(participants))
 	for _, p := range participants {
 		var t pb.Outcome_OutcomeType
-		switch *p.Type {
+		switch p.Type {
 		case pb.Participant_HOME:
 			t = pb.Outcome_HOME
 		case pb.Participant_AWAY:

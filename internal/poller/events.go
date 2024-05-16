@@ -224,9 +224,9 @@ func divideEvents(events []*pb.Event) (map[string][]byte, map[string][]byte, err
 			return nil, nil, err
 		}
 		if e.IsLive {
-			li[*e.ExternalId] = b
+			li[e.ExternalId] = b
 		} else {
-			pm[*e.ExternalId] = b
+			pm[e.ExternalId] = b
 		}
 	}
 	return li, pm, nil

@@ -16,15 +16,14 @@ func getParticipants(event *model.Event) ([]*pb.Participant, error) {
 			isMarketName(mr, mapping.OutrightMarketType) {
 			for _, mc := range mr.Children {
 				oc := &mc.Outcome
-				t := getParticipantType(oc.OutcomeMeaningMinorCode)
 				pts = append(pts, &pb.Participant{
-					Type: &t,
+					Type: getParticipantType(oc.OutcomeMeaningMinorCode),
 					Name: oc.Name,
 				})
 			}
 		}
 	}
-	if len(pts) > 2 && *pts[0].Type != pb.Participant_COMPETITOR {
+	if len(pts) > 2 && pts[0].Type != pb.Participant_COMPETITOR {
 		return nil, fmt.Errorf("%w: expected 2", ErrTooManyParticipants)
 	}
 	return pts, nil

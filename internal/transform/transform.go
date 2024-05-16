@@ -73,8 +73,6 @@ func transformEvents(eventsRoot *model.EventsRoot) ([]*pb.Event, error) {
 }
 
 func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) {
-	eId := event.ID
-
 	st, err := getStartTime(event.StartTime)
 	if err != nil {
 		return nil, nil, err
@@ -103,11 +101,9 @@ func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) 
 		return nil, nil, err
 	}
 
-	link := getLink(event)
-
 	return &pb.Event{
 		// ID:           bookmaker.GenerateId(st, stp, lg, pts),
-		ExternalId:   &eId,
+		ExternalId:   event.ID,
 		SportType:    mapping.SportTypes[event.CategoryCode],
 		Name:         name,
 		League:       event.TypeName,
@@ -115,7 +111,7 @@ func transformEvent(event *model.Event) (*pb.Event, map[string]struct{}, error) 
 		IsLive:       live,
 		Participants: pts,
 		Markets:      mks,
-		Link:         &link,
+		Link:         getLink(event),
 	}, umtps, nil
 }
 

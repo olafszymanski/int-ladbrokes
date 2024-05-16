@@ -22,7 +22,7 @@ func getStartTime(startTime string) (time.Time, error) {
 }
 
 func getName(name string, participants []*pb.Participant) (string, error) {
-	if len(participants) > 0 && *participants[0].Type != pb.Participant_COMPETITOR {
+	if len(participants) > 0 && participants[0].Type != pb.Participant_COMPETITOR {
 		name = fmt.Sprintf("%s vs %s", participants[0].Name, participants[1].Name)
 	}
 	return name, nil
