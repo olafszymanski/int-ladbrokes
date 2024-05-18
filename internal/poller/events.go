@@ -92,7 +92,7 @@ func (p *Poller) pollEvents(ctx context.Context, logger *logrus.Entry, sportType
 				if err := p.removeUnavailableEvents(ctx, hash, ids, liveEvents); err != nil {
 					return err
 				}
-				// we store only new live events as we don't want to override data coming from websocket
+				// we store only new live events as we don't want to override data coming from push updates
 				if err := p.storeOnlyNewEvents(ctx, hash, ids, liveEvents); err != nil {
 					return err
 				}
