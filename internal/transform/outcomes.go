@@ -85,7 +85,7 @@ func getOutcomes(market *model.Market, participantsOutcomeTypes map[string]pb.Ou
 	return outcomes, nil
 }
 
-// For some reason spread points are returned with a trailing comma (everytime?) so we need to normalize them
+// for some reason spread points are returned with a trailing comma (everytime?) so we need to normalize them
 func normalizePoints(points string) string {
 	if points[len(points)-1] == ',' {
 		return points[:len(points)-1]
