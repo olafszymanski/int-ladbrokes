@@ -46,6 +46,12 @@ func (p *Poller) Run(ctx context.Context, sportType pb.SportType) error {
 			return
 		}
 	}()
+	go func() {
+		if err := p.pollUpdates(ctx, logger, sportType); err != nil {
+			errCh <- err
+			return
+		}
+	}()
 
 	if err := <-errCh; err != nil {
 		return err

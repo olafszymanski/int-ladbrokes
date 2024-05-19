@@ -19,6 +19,16 @@ var (
 	ErrParseBool           = fmt.Errorf("parsing bool failed")
 )
 
+type UpdateData struct {
+	ID      string
+	RawData []byte
+}
+
+type Update struct {
+	Data             map[mapping.UpdateType][]*UpdateData
+	RequestBodyParts []string
+}
+
 func TransformClasses(rawData []byte) ([]string, error) {
 	var root model.ClassesRoot
 	if err := json.Unmarshal(rawData, &root); err != nil {
@@ -33,6 +43,31 @@ func TransformEvents(rawData []byte) ([]*pb.Event, error) {
 		return nil, fmt.Errorf("%w: %s", ErrDecodeResponse, err)
 	}
 	return transformEvents(&root)
+}
+
+func TransformUpdates(rawData []byte) (*Update, error) {
+	var (
+		rawUpdates = splitRawData(rawData)
+		res        = make(map[mapping.UpdateType][]*UpdateData)
+	)
+	for _, raw := range rawUpdates {
+		tp, err := getUpdateType(raw)
+		if err != nil {
+			return nil, err
+		}
+		id, err := getUpdateDataId(raw, tp)
+		if err != nil {
+			return nil, err
+		}
+		res[tp] = append(res[tp], &UpdateData{
+			ID:      id,
+			RawData: getUpdateData(raw),
+		})
+	}
+	return &Update{
+		Data:             res,
+		RequestBodyParts: getRequestBodyParts(rawUpdates),
+	}, nil
 }
 
 func transformClasses(classesRoot *model.ClassesRoot) []string {
@@ -67,7 +102,7 @@ func transformEvents(eventsRoot *model.EventsRoot) ([]*pb.Event, error) {
 		}
 	}
 	if len(umtps) > 0 {
-		// logrus.WithField("unhandled_market_types", stringifyMarketTypes(umtps)).Warn("found unhandled market types")
+		// TODO: Implement logrus.WithField("unhandled_market_types", stringifyMarketTypes(umtps)).Warn("found unhandled market types")
 	}
 	return evs, nil
 }
