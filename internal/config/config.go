@@ -17,9 +17,13 @@ type Config struct {
 		RequestTimeout  time.Duration `env:"CLASSES_REQUEST_TIMEOUT" envDefault:"2s"`
 		RequestInterval time.Duration `env:"CLASSES_REQUEST_INTERVAL" envDefault:"5s"`
 	}
-	Events struct {
-		RequestTimeout  time.Duration `env:"EVENTS_REQUEST_TIMEOUT" envDefault:"2s"`
-		RequestInterval time.Duration `env:"EVENTS_REQUEST_INTERVAL" envDefault:"5s"`
+	Live struct {
+		RequestTimeout  time.Duration `env:"LIVE_REQUEST_TIMEOUT" envDefault:"2s"`
+		RequestInterval time.Duration `env:"LIVE_REQUEST_INTERVAL" envDefault:"2500ms"`
+	}
+	PreMatch struct {
+		RequestTimeout  time.Duration `env:"PRE_MATCH_REQUEST_TIMEOUT" envDefault:"2s"`
+		RequestInterval time.Duration `env:"PRE_MATCH_REQUEST_INTERVAL" envDefault:"10s"`
 	}
 }
 

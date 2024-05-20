@@ -4,125 +4,44 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"maps"
 	"net/http"
 	"sync"
 	"time"
 
-	"github.com/olafszymanski/int-ladbrokes/internal/config"
 	"github.com/olafszymanski/int-ladbrokes/internal/transform"
 	sdkHttp "github.com/olafszymanski/int-sdk/http"
 	"github.com/olafszymanski/int-sdk/integration/pb"
 	"github.com/olafszymanski/int-sdk/storage"
-	"github.com/sirupsen/logrus"
 	"google.golang.org/protobuf/proto"
 )
 
 const (
 	eventsUrl = "https://ss-aka-ori.ladbrokes.com/openbet-ssviewer/Drilldown/2.81/EventToOutcomeForClass/%s?simpleFilter=event.startTime:greaterThanOrEqual:%s&translationLang=en&responseFormat=json&prune=event&prune=market&childCount=event"
 
-	lessThanFilter = "simpleFilter=event.startTime:lessThan:%s"
+	startTimelessThanFilter = "simpleFilter=event.startTime:lessThan:%s"
 )
 
-type timeRange struct {
-	start time.Duration
-	end   time.Duration
-}
+type saveFunc func(currentEventsIds []string, marshaledEvents map[string][]byte) error
 
-var timeRanges = []timeRange{
-	{-4 * time.Hour, 0},
-	{0, 8 * time.Hour},
-	{8 * time.Hour, 32 * time.Hour},
-	{32 * time.Hour, 0}, // last element will not have end time
-}
-
-func (p *Poller) pollEvents(ctx context.Context, logger *logrus.Entry, sportType pb.SportType) error {
-	var (
-		startTime      time.Time
-		done           = make(chan struct{})
-		liveEvents     = make(map[string][]byte)
-		preMatchEvents = make(map[string][]byte)
-	)
-	defer close(done)
-
-	for {
-		startTime = time.Now()
-
-		cls, err := p.storage.Get(ctx, fmt.Sprintf(classesStorageKey, sportType))
-		if err != nil && !errors.Is(err, storage.ErrNotFound) {
-			return err
-		}
-		if len(cls) > 0 {
-			go func() {
-				evs, err := p.fetchEvents(cls)
-				if err != nil {
-					logger.WithError(err).Error("polling events failed")
-					return
-				}
-				if len(evs) == 0 {
-					logger.Warn("no events polled")
-					return
-				}
-				liveEvents, preMatchEvents, err = divideEvents(evs)
-				if err != nil {
-					logger.WithError(err).Error("converting events to maps failed")
-					return
-				}
-				done <- struct{}{}
-			}()
-		} else {
-			continue
-		}
-
-		select {
-		case <-done:
-			logger.WithFields(logrus.Fields{
-				"live_events_length":      len(liveEvents),
-				"pre_match_events_length": len(preMatchEvents),
-			}).Debug("events polled")
-
-			if len(liveEvents) > 0 {
-				hash := fmt.Sprintf(config.LiveEventsStorageKey, sportType)
-				ids, err := p.storage.GetHashFieldKeys(ctx, hash)
-				if err != nil {
-					return err
-				}
-				if err := p.removeUnavailableEvents(ctx, hash, ids, liveEvents); err != nil {
-					return err
-				}
-				// we store only new live events as we don't want to override data coming from push updates
-				if err := p.storeOnlyNewEvents(ctx, hash, ids, liveEvents); err != nil {
-					return err
-				}
-			}
-			if len(preMatchEvents) > 0 {
-				hash := fmt.Sprintf(config.PreMatchEventsStorageKey, sportType)
-				ids, err := p.storage.GetHashFieldKeys(ctx, hash)
-				if err != nil {
-					return err
-				}
-				if err := p.removeUnavailableEvents(ctx, hash, ids, preMatchEvents); err != nil {
-					return err
-				}
-				if err := p.storage.StoreHashFields(ctx, hash, preMatchEvents); err != nil {
-					return err
-				}
-			}
-			<-time.After(p.config.Events.RequestInterval - time.Since(startTime))
-		case <-time.After(p.config.Events.RequestInterval):
-			logger.Warn("events polling took longer than expected")
-		}
+func (p *Poller) pollEvents(ctx context.Context, baseUrl string, sportType pb.SportType, timeout time.Duration, timePeriods []timePeriod) ([]*pb.Event, error) {
+	cls, err := p.storage.Get(ctx, fmt.Sprintf(classesStorageKey, sportType))
+	if err != nil && !errors.Is(err, storage.ErrNotFound) {
+		return nil, err
 	}
+	if len(cls) == 0 {
+		return nil, nil
+	}
+	return p.fetchEvents(baseUrl, cls, timeout, timePeriods)
 }
 
-func (p *Poller) fetchEvents(classes []byte) ([]*pb.Event, error) {
+func (p *Poller) fetchEvents(baseUrl string, classes []byte, timeout time.Duration, timePeriods []timePeriod) ([]*pb.Event, error) {
 	var (
+		requestsCount = len(timePeriods)
 		wg            = sync.WaitGroup{}
 		lock          = sync.Mutex{}
 		events        = make([]*pb.Event, 0)
-		errCh         = make(chan error)
 		done          = make(chan struct{})
-		requestsCount = len(timeRanges)
+		errCh         = make(chan error)
 	)
 	defer func() {
 		close(errCh)
@@ -135,13 +54,22 @@ func (p *Poller) fetchEvents(classes []byte) ([]*pb.Event, error) {
 		go func() {
 			defer wg.Done()
 
-			u := getEventsUrl(
-				classes,
-				timeRanges,
-				i,
-				requestsCount,
-			)
-			evs, err := p.getEvents(u, p.config.Events.RequestTimeout)
+			var url string
+			if i == requestsCount-1 {
+				url = getLastUrl(
+					baseUrl,
+					classes,
+					&timePeriods[i],
+				)
+			} else {
+				url = getUrl(
+					baseUrl,
+					classes,
+					&timePeriods[i],
+				)
+			}
+
+			evs, err := p.getEvents(url, timeout)
 			if err != nil {
 				errCh <- err
 				return
@@ -179,7 +107,22 @@ func (p *Poller) getEvents(url string, timeout time.Duration) ([]*pb.Event, erro
 	return transform.TransformEvents(res.Body)
 }
 
-func (p *Poller) removeUnavailableEvents(ctx context.Context, hash string, ids []string, events map[string][]byte) error {
+func (p *Poller) saveEvents(ctx context.Context, hash string, events []*pb.Event, save saveFunc) error {
+	mevs, err := marshalEvents(events)
+	if err != nil {
+		return err
+	}
+	ids, err := p.storage.GetHashFieldKeys(ctx, hash)
+	if err != nil {
+		return err
+	}
+	if err := p.removeMissingEvents(ctx, hash, ids, mevs); err != nil {
+		return err
+	}
+	return save(ids, mevs)
+}
+
+func (p *Poller) removeMissingEvents(ctx context.Context, hash string, ids []string, events map[string][]byte) error {
 	i := getMissingEventsIds(ids, events)
 	if len(i) < 1 {
 		return nil
@@ -187,47 +130,19 @@ func (p *Poller) removeUnavailableEvents(ctx context.Context, hash string, ids [
 	return p.storage.DeleteHashFields(ctx, hash, i)
 }
 
-func (p *Poller) storeOnlyNewEvents(ctx context.Context, hash string, ids []string, events map[string][]byte) error {
-	e := getNewEvents(ids, events)
-	if len(e) < 1 {
-		return nil
-	}
-	return p.storage.StoreHashFields(ctx, hash, e)
-}
-
-func getRequestTimes(timeRanges []timeRange, iteration int) (time.Time, time.Time) {
-	n := time.Now().UTC()
-	return n.Add(timeRanges[iteration].start), n.Add(timeRanges[iteration].end)
-}
-
-func getEventsUrl(classes []byte, timeRanges []timeRange, iteration, requestsCount int) string {
-	st, et := getRequestTimes(timeRanges, iteration)
-	if iteration == requestsCount-1 {
-		return fmt.Sprintf(eventsUrl, classes, st.Format(time.RFC3339))
-	}
+func getUrl(url string, classes []byte, timePeriod *timePeriod) string {
+	st, et := timePeriod.getTimes()
 	return fmt.Sprintf(
-		fmt.Sprintf("%s&%s", eventsUrl, lessThanFilter),
+		fmt.Sprintf("%s&%s", url, startTimelessThanFilter),
 		classes,
 		st.Format(time.RFC3339),
 		et.Format(time.RFC3339),
 	)
 }
 
-// divides events into two maps, one for live events and one for pre-match events
-func divideEvents(events []*pb.Event) (map[string][]byte, map[string][]byte, error) {
-	li, pm := make(map[string][]byte), make(map[string][]byte)
-	for _, e := range events {
-		b, err := proto.Marshal(e)
-		if err != nil {
-			return nil, nil, err
-		}
-		if e.IsLive {
-			li[e.ExternalId] = b
-		} else {
-			pm[e.ExternalId] = b
-		}
-	}
-	return li, pm, nil
+func getLastUrl(url string, classes []byte, timePeriod *timePeriod) string {
+	st, _ := timePeriod.getTimes()
+	return fmt.Sprintf(url, classes, st.Format(time.RFC3339))
 }
 
 func getMissingEventsIds(ids []string, events map[string][]byte) []string {
@@ -240,15 +155,14 @@ func getMissingEventsIds(ids []string, events map[string][]byte) []string {
 	return r
 }
 
-func getNewEvents(ids []string, events map[string][]byte) map[string][]byte {
-	e := make(map[string][]byte)
-	maps.Copy(e, events)
-	for k := range events {
-		for _, id := range ids {
-			if k == id {
-				delete(e, k)
-			}
+func marshalEvents(events []*pb.Event) (map[string][]byte, error) {
+	evs := make(map[string][]byte)
+	for _, e := range events {
+		b, err := proto.Marshal(e)
+		if err != nil {
+			return nil, err
 		}
+		evs[e.ExternalId] = b
 	}
-	return e
+	return evs, nil
 }
