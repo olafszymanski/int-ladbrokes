@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/olafszymanski/int-ladbrokes/internal/config"
+	"github.com/olafszymanski/int-ladbrokes/internal/storage"
 	"github.com/olafszymanski/int-sdk/http"
 	"github.com/olafszymanski/int-sdk/integration/pb"
-	"github.com/olafszymanski/int-sdk/storage"
 	"github.com/sirupsen/logrus"
 )
 
@@ -16,10 +16,10 @@ var ErrUnexpectedStatusCode = fmt.Errorf("unexpected status code")
 type Poller struct {
 	config     *config.Config
 	httpClient http.Doer
-	storage    storage.Storager
+	storage    *storage.Storage
 }
 
-func NewPoller(config *config.Config, httpClient http.Doer, storage storage.Storager) (*Poller, error) {
+func NewPoller(config *config.Config, httpClient http.Doer, storage *storage.Storage) (*Poller, error) {
 	return &Poller{
 		config:     config,
 		httpClient: httpClient,

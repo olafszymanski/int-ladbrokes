@@ -44,7 +44,7 @@ func (p *Poller) pollClasses(ctx context.Context, logger *logrus.Entry, sportTyp
 		select {
 		case cls := <-classesCh:
 			logger.WithField("classes_length", len(cls)).Debug("classes polled")
-			if err := p.storage.Store(ctx, fmt.Sprintf(classesStorageKey, sportType), cls, 0); err != nil {
+			if err := p.storage.StoreClasses(ctx, fmt.Sprintf(classesStorageKey, sportType), cls); err != nil {
 				return err
 			}
 			<-time.After(p.config.Classes.RequestInterval - time.Since(startTime))

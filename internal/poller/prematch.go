@@ -47,9 +47,12 @@ func (p *Poller) pollPreMatchEvents(ctx context.Context, logger *logrus.Entry, s
 			logger.WithField("length", len(evs)).Debug("pre-match events polled")
 
 			hash := fmt.Sprintf(config.PreMatchEventsStorageKey, sportType)
-			p.saveEvents(ctx, hash, evs, func(_ []string, marshaledEvents map[string][]byte) error {
-				return p.storage.StoreHashFields(ctx, hash, marshaledEvents)
-			})
+			if err := p.storage.RemoveMissingEvents(ctx, hash, evs); err != nil {
+				return err
+			}
+			if err := p.storage.StoreEvents(ctx, hash, evs); err != nil {
+				return err
+			}
 			<-time.After(p.config.PreMatch.RequestInterval - time.Since(startTime))
 		case <-time.After(p.config.PreMatch.RequestInterval):
 			logger.Warn("pre-match events polling took longer than expected")

@@ -14,7 +14,6 @@ import (
 	sdkHttp "github.com/olafszymanski/int-sdk/http"
 	"github.com/olafszymanski/int-sdk/integration/pb"
 	"github.com/sirupsen/logrus"
-	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -40,7 +39,8 @@ func (p *Poller) pollUpdates(ctx context.Context, logger *logrus.Entry, sportTyp
 
 	go func() {
 		for {
-			ids, err := p.storage.GetHashFieldKeys(ctx, fmt.Sprintf(config.LiveEventsStorageKey, sportType))
+			hash := fmt.Sprintf(config.LiveEventsStorageKey, sportType)
+			ids, err := p.storage.GetEventsIds(ctx, hash)
 			if err != nil {
 				errCh <- err
 				return
@@ -81,7 +81,8 @@ func (p *Poller) pollUpdates(ctx context.Context, logger *logrus.Entry, sportTyp
 					if update == nil {
 						return
 					}
-					ev, err := p.getEventFromStorage(ctx, sportType, id)
+
+					ev, err := p.storage.GetEvent(ctx, hash, id)
 					if err != nil {
 						errCh <- fmt.Errorf("failed to get event from storage: %s", err)
 						return
@@ -90,8 +91,8 @@ func (p *Poller) pollUpdates(ctx context.Context, logger *logrus.Entry, sportTyp
 						errCh <- fmt.Errorf("failed to update event: %s", err)
 						return
 					}
-					if err := p.storeEventInStorage(ctx, sportType, id, ev); err != nil {
-						errCh <- fmt.Errorf("failed to store event: %s", err)
+					if err := p.storage.StoreEvent(ctx, hash, ev); err != nil {
+						errCh <- fmt.Errorf("failed to save event: %s", err)
 						return
 					}
 
@@ -128,26 +129,6 @@ func (p *Poller) getUpdates(requestBody []byte, timeout time.Duration) (*transfo
 		return nil, fmt.Errorf("%w: %v", ErrUnexpectedStatusCode, res.Status)
 	}
 	return transform.TransformUpdates(res.Body)
-}
-
-func (p *Poller) getEventFromStorage(ctx context.Context, sportType pb.SportType, id string) (*pb.Event, error) {
-	raw, err := p.storage.GetHashField(ctx, fmt.Sprintf(config.LiveEventsStorageKey, sportType), id)
-	if err != nil {
-		return nil, err
-	}
-	ev := &pb.Event{}
-	if err := proto.Unmarshal(raw, ev); err != nil {
-		return nil, err
-	}
-	return ev, nil
-}
-
-func (p *Poller) storeEventInStorage(ctx context.Context, sportType pb.SportType, id string, ev *pb.Event) error {
-	raw, err := proto.Marshal(ev)
-	if err != nil {
-		return err
-	}
-	return p.storage.StoreHashField(ctx, fmt.Sprintf(config.LiveEventsStorageKey, sportType), id, raw)
 }
 
 func updateEvent(update *transform.Update, event *pb.Event) error {

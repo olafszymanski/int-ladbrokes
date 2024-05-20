@@ -5,9 +5,10 @@ import (
 
 	"github.com/olafszymanski/int-ladbrokes/internal/config"
 	"github.com/olafszymanski/int-ladbrokes/internal/poller"
+	"github.com/olafszymanski/int-ladbrokes/internal/storage"
 	"github.com/olafszymanski/int-sdk/http"
 	"github.com/olafszymanski/int-sdk/integration/pb"
-	"github.com/olafszymanski/int-sdk/storage"
+	sdkStorage "github.com/olafszymanski/int-sdk/storage"
 	"github.com/sirupsen/logrus"
 )
 
@@ -20,14 +21,14 @@ func main() {
 		logrus.WithError(err).Fatal("failed to load config")
 	}
 
-	s := storage.NewMemoryStorage()
+	s := storage.NewStorage(sdkStorage.NewMemoryStorage())
 
-	cl := http.NewClient()
+	httpCl := http.NewClient()
 
 	ctx := context.Background()
 
 	go func() {
-		p, err := poller.NewPoller(cfg, cl, s)
+		p, err := poller.NewPoller(cfg, httpCl, s)
 		if err != nil {
 			logrus.WithError(err).Fatal("failed to create poller")
 		}

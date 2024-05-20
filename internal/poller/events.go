@@ -12,7 +12,6 @@ import (
 	sdkHttp "github.com/olafszymanski/int-sdk/http"
 	"github.com/olafszymanski/int-sdk/integration/pb"
 	"github.com/olafszymanski/int-sdk/storage"
-	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -21,10 +20,8 @@ const (
 	startTimelessThanFilter = "simpleFilter=event.startTime:lessThan:%s"
 )
 
-type saveFunc func(currentEventsIds []string, marshaledEvents map[string][]byte) error
-
 func (p *Poller) pollEvents(ctx context.Context, baseUrl string, sportType pb.SportType, timeout time.Duration, timePeriods []timePeriod) ([]*pb.Event, error) {
-	cls, err := p.storage.Get(ctx, fmt.Sprintf(classesStorageKey, sportType))
+	cls, err := p.storage.GetClasses(ctx, fmt.Sprintf(classesStorageKey, sportType))
 	if err != nil && !errors.Is(err, storage.ErrNotFound) {
 		return nil, err
 	}
@@ -107,29 +104,6 @@ func (p *Poller) getEvents(url string, timeout time.Duration) ([]*pb.Event, erro
 	return transform.TransformEvents(res.Body)
 }
 
-func (p *Poller) saveEvents(ctx context.Context, hash string, events []*pb.Event, save saveFunc) error {
-	mevs, err := marshalEvents(events)
-	if err != nil {
-		return err
-	}
-	ids, err := p.storage.GetHashFieldKeys(ctx, hash)
-	if err != nil {
-		return err
-	}
-	if err := p.removeMissingEvents(ctx, hash, ids, mevs); err != nil {
-		return err
-	}
-	return save(ids, mevs)
-}
-
-func (p *Poller) removeMissingEvents(ctx context.Context, hash string, ids []string, events map[string][]byte) error {
-	i := getMissingEventsIds(ids, events)
-	if len(i) < 1 {
-		return nil
-	}
-	return p.storage.DeleteHashFields(ctx, hash, i)
-}
-
 func getUrl(url string, classes []byte, timePeriod *timePeriod) string {
 	st, et := timePeriod.getTimes()
 	return fmt.Sprintf(
@@ -143,26 +117,4 @@ func getUrl(url string, classes []byte, timePeriod *timePeriod) string {
 func getLastUrl(url string, classes []byte, timePeriod *timePeriod) string {
 	st, _ := timePeriod.getTimes()
 	return fmt.Sprintf(url, classes, st.Format(time.RFC3339))
-}
-
-func getMissingEventsIds(ids []string, events map[string][]byte) []string {
-	r := make([]string, 0)
-	for _, k := range ids {
-		if _, ok := events[k]; !ok {
-			r = append(r, k)
-		}
-	}
-	return r
-}
-
-func marshalEvents(events []*pb.Event) (map[string][]byte, error) {
-	evs := make(map[string][]byte)
-	for _, e := range events {
-		b, err := proto.Marshal(e)
-		if err != nil {
-			return nil, err
-		}
-		evs[e.ExternalId] = b
-	}
-	return evs, nil
 }
