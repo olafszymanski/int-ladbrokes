@@ -46,6 +46,9 @@ func TransformEvents(rawData []byte) ([]*pb.Event, error) {
 }
 
 func TransformUpdates(rawData []byte) (*Update, error) {
+	if len(rawData) == 0 {
+		return nil, nil
+	}
 	var (
 		rawUpdates = splitRawData(rawData)
 		res        = make(map[mapping.UpdateType][]*UpdateData)
