@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/olafszymanski/int-ladbrokes/internal/config"
 	"github.com/olafszymanski/int-ladbrokes/internal/mapping"
 	"github.com/olafszymanski/int-ladbrokes/internal/model"
 	"github.com/olafszymanski/int-ladbrokes/internal/transform"
@@ -39,7 +40,7 @@ func (p *Poller) pollUpdates(ctx context.Context, logger *logrus.Entry, sportTyp
 
 	go func() {
 		for {
-			ids, err := p.storage.GetHashFieldKeys(ctx, fmt.Sprintf(liveEventsStorageKey, sportType))
+			ids, err := p.storage.GetHashFieldKeys(ctx, fmt.Sprintf(config.LiveEventsStorageKey, sportType))
 			if err != nil {
 				errCh <- err
 				return
@@ -69,10 +70,15 @@ func (p *Poller) pollUpdates(ctx context.Context, logger *logrus.Entry, sportTyp
 					}
 					lock.Unlock()
 
+					// TODO: Remove time
 					ti := time.Now()
 					update, err := p.getUpdates(body, time.Second*60)
 					if err != nil {
 						errCh <- fmt.Errorf("failed to receive update: %s", err)
+						return
+					}
+					// no update received, we don't have to do anything
+					if update == nil {
 						return
 					}
 					ev, err := p.getEventFromStorage(ctx, sportType, id)
@@ -125,7 +131,7 @@ func (p *Poller) getUpdates(requestBody []byte, timeout time.Duration) (*transfo
 }
 
 func (p *Poller) getEventFromStorage(ctx context.Context, sportType pb.SportType, id string) (*pb.Event, error) {
-	raw, err := p.storage.GetHashField(ctx, fmt.Sprintf(liveEventsStorageKey, sportType), id)
+	raw, err := p.storage.GetHashField(ctx, fmt.Sprintf(config.LiveEventsStorageKey, sportType), id)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +147,7 @@ func (p *Poller) storeEventInStorage(ctx context.Context, sportType pb.SportType
 	if err != nil {
 		return err
 	}
-	return p.storage.StoreHashField(ctx, fmt.Sprintf(liveEventsStorageKey, sportType), id, raw)
+	return p.storage.StoreHashField(ctx, fmt.Sprintf(config.LiveEventsStorageKey, sportType), id, raw)
 }
 
 func updateEvent(update *transform.Update, event *pb.Event) error {

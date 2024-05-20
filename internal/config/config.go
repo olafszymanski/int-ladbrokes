@@ -7,6 +7,11 @@ import (
 	"github.com/caarlos0/env/v10"
 )
 
+const (
+	LiveEventsStorageKey     = "LIVE_EVENTS_%s"
+	PreMatchEventsStorageKey = "PRE_MATCH_EVENTS_%s"
+)
+
 type Config struct {
 	Classes struct {
 		RequestTimeout  time.Duration `env:"CLASSES_REQUEST_TIMEOUT" envDefault:"2s"`

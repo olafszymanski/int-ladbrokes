@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/olafszymanski/int-ladbrokes/internal/config"
 	"github.com/olafszymanski/int-ladbrokes/internal/transform"
 	sdkHttp "github.com/olafszymanski/int-sdk/http"
 	"github.com/olafszymanski/int-sdk/integration/pb"
@@ -21,9 +22,6 @@ const (
 	eventsUrl = "https://ss-aka-ori.ladbrokes.com/openbet-ssviewer/Drilldown/2.81/EventToOutcomeForClass/%s?simpleFilter=event.startTime:greaterThanOrEqual:%s&translationLang=en&responseFormat=json&prune=event&prune=market&childCount=event"
 
 	lessThanFilter = "simpleFilter=event.startTime:lessThan:%s"
-
-	liveEventsStorageKey     = "LIVE_EVENTS_%s"
-	preMatchEventsStorageKey = "PRE_MATCH_EVENTS_%s"
 )
 
 type timeRange struct {
@@ -84,7 +82,7 @@ func (p *Poller) pollEvents(ctx context.Context, logger *logrus.Entry, sportType
 			}).Debug("events polled")
 
 			if len(liveEvents) > 0 {
-				hash := fmt.Sprintf(liveEventsStorageKey, sportType)
+				hash := fmt.Sprintf(config.LiveEventsStorageKey, sportType)
 				ids, err := p.storage.GetHashFieldKeys(ctx, hash)
 				if err != nil {
 					return err
@@ -98,7 +96,7 @@ func (p *Poller) pollEvents(ctx context.Context, logger *logrus.Entry, sportType
 				}
 			}
 			if len(preMatchEvents) > 0 {
-				hash := fmt.Sprintf(preMatchEventsStorageKey, sportType)
+				hash := fmt.Sprintf(config.PreMatchEventsStorageKey, sportType)
 				ids, err := p.storage.GetHashFieldKeys(ctx, hash)
 				if err != nil {
 					return err

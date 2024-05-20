@@ -27,7 +27,7 @@ func NewClient(cfg *config.Config, httpClient http.Doer, storage storage.Storage
 }
 
 func (c *client) GetLive(ctx context.Context, request *pb.Request) (*pb.Response, error) {
-	evs, err := c.storage.GetHashFields(ctx, fmt.Sprintf("LIVE_EVENTS_%s", request.SportType.String()))
+	evs, err := c.storage.GetHashFields(ctx, fmt.Sprintf(config.LiveEventsStorageKey, request.SportType.String()))
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (c *client) GetLive(ctx context.Context, request *pb.Request) (*pb.Response
 }
 
 func (c *client) GetPreMatch(ctx context.Context, request *pb.Request) (*pb.Response, error) {
-	evs, err := c.storage.GetHashFields(ctx, fmt.Sprintf("PRE_MATCH_EVENTS_%s", request.SportType.String()))
+	evs, err := c.storage.GetHashFields(ctx, fmt.Sprintf(config.PreMatchEventsStorageKey, request.SportType.String()))
 	if err != nil {
 		return nil, err
 	}
