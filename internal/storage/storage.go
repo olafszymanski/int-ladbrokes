@@ -47,7 +47,7 @@ func (s *Storage) StoreEvent(ctx context.Context, hash string, event *pb.Event) 
 	if err != nil {
 		return err
 	}
-	return s.storage.StoreHashField(ctx, hash, event.Id, raw)
+	return s.storage.StoreHashField(ctx, hash, event.ExternalId, raw)
 }
 
 func (s *Storage) GetEvents(ctx context.Context, hash string) ([]*pb.Event, error) {
@@ -73,7 +73,7 @@ func (s *Storage) StoreEvents(ctx context.Context, hash string, events []*pb.Eve
 		if err != nil {
 			return err
 		}
-		rawEvs[e.Id] = raw
+		rawEvs[e.ExternalId] = raw
 	}
 	return s.storage.StoreHashFields(ctx, hash, rawEvs)
 }
