@@ -30,11 +30,17 @@ func main() {
 		logrus.SetLevel(level)
 	}
 
-	s := storage.NewStorage(sdkStorage.NewMemoryStorage())
+	ctx := context.Background()
+
+	r, err := sdkStorage.NewRedisStorage(ctx, cfg.Storage.Address, cfg.Storage.Password)
+	if err != nil {
+		logrus.WithError(err).Fatal("failed to create storage")
+	}
+	defer r.Close()
+
+	s := storage.NewStorage(r)
 
 	httpCl := http.NewClient()
-
-	ctx := context.Background()
 
 	go func() {
 		p, err := poller.NewPoller(cfg, httpCl, s)
