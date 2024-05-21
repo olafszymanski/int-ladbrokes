@@ -1,0 +1,9 @@
+FROM alpine:latest
+
+WORKDIR /app
+
+COPY /bin/main /bin/main
+
+EXPOSE 3000
+
+ENTRYPOINT ["/bin/main"]

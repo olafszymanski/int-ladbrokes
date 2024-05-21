@@ -2,23 +2,33 @@ package main
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/olafszymanski/int-ladbrokes/internal/client"
 	"github.com/olafszymanski/int-ladbrokes/internal/config"
 	"github.com/olafszymanski/int-ladbrokes/internal/poller"
 	"github.com/olafszymanski/int-ladbrokes/internal/storage"
 	"github.com/olafszymanski/int-sdk/http"
 	"github.com/olafszymanski/int-sdk/integration/pb"
+	"github.com/olafszymanski/int-sdk/integration/server"
 	sdkStorage "github.com/olafszymanski/int-sdk/storage"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
 	logrus.Info("starting service...")
-	logrus.SetLevel(logrus.DebugLevel)
 
 	cfg, err := config.NewConfig()
 	if err != nil {
 		logrus.WithError(err).Fatal("failed to load config")
+	}
+
+	if cfg.App.LogLevel != "" {
+		level, err := logrus.ParseLevel(cfg.App.LogLevel)
+		if err != nil {
+			logrus.WithError(err).Fatal("failed to parse log level")
+		}
+		logrus.SetLevel(level)
 	}
 
 	s := storage.NewStorage(sdkStorage.NewMemoryStorage())
@@ -37,5 +47,6 @@ func main() {
 		}
 	}()
 
-	select {}
+	cl := client.NewClient(cfg, httpCl, s)
+	server.Start(cl, fmt.Sprint(cfg.App.Port))
 }
