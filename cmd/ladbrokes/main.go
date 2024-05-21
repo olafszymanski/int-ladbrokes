@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/olafszymanski/int-ladbrokes/internal/client"
 	"github.com/olafszymanski/int-ladbrokes/internal/config"
@@ -48,5 +47,5 @@ func main() {
 	}()
 
 	cl := client.NewClient(cfg, httpCl, s)
-	server.Start(cl, fmt.Sprint(cfg.App.Port))
+	server.Start(cl, cfg.App.Port)
 }

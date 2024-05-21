@@ -14,8 +14,12 @@ const (
 
 type Config struct {
 	App struct {
+		Port     string `env:"PORT" envDefault:"8080"`
 		LogLevel string `env:"LOG_LEVEL" envDefault:"info"`
-		Port     int    `env:"PORT" envDefault:"8080"`
+	}
+	Storage struct {
+		Address  string `env:"STORAGE_ADDRESS" envDefault:"localhost:6379"`
+		Password string `env:"REDIS_PASSWORD" envDefault:""`
 	}
 	Classes struct {
 		RequestTimeout  time.Duration `env:"CLASSES_REQUEST_TIMEOUT" envDefault:"2s"`
@@ -29,10 +33,6 @@ type Config struct {
 		RequestTimeout  time.Duration `env:"PRE_MATCH_REQUEST_TIMEOUT" envDefault:"2s"`
 		RequestInterval time.Duration `env:"PRE_MATCH_REQUEST_INTERVAL" envDefault:"10s"`
 	}
-	Storage struct {
-		Address  string `env:"STORAGE_ADDRESS" envDefault:"localhost:6379"`
-		Password string `env:"REDIS_PASSWORD" envDefault:""`
-	}
 }
 
 func NewConfig() (*Config, error) {
@@ -40,5 +40,6 @@ func NewConfig() (*Config, error) {
 	if err := env.Parse(cfg); err != nil {
 		return nil, fmt.Errorf("failed to parse config: %w", err)
 	}
+
 	return cfg, nil
 }
