@@ -14,7 +14,7 @@ const (
 
 type Config struct {
 	App struct {
-		Port     string `env:"PORT" envDefault:"8080"`
+		Port     string `env:"APP_PORT" envDefault:"8080"`
 		LogLevel string `env:"LOG_LEVEL" envDefault:"info"`
 	}
 	Storage struct {

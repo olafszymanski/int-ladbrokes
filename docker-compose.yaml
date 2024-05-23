@@ -1,6 +1,6 @@
 services:
   cache:
-    image: redis:6.2-alpine
+    image: redis:7.2.5-alpine
     command: redis-server --save 15 1 --loglevel warning
     ports:
       - '6379:6379'
@@ -18,7 +18,8 @@ services:
       - ./:/src
     environment:
       - LOG_LEVEL=debug
+      - STORAGE_ADDRESS=cache:6379
     ports:
-      - '3000:3000'
+      - '8080:8080'
 volumes:
   cache:
