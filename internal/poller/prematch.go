@@ -48,10 +48,10 @@ func (p *Poller) pollPreMatchEvents(ctx context.Context, logger *logrus.Entry, s
 
 			hash := fmt.Sprintf(config.PreMatchEventsStorageKey, sportType)
 			if err := p.storage.RemoveMissingEvents(ctx, hash, evs); err != nil {
-				return err
+				return fmt.Errorf("failed to remove missing pre-match events: %s", err)
 			}
 			if err := p.storage.StoreEvents(ctx, hash, evs); err != nil {
-				return err
+				return fmt.Errorf("failed to store pre-match events: %s", err)
 			}
 			<-time.After(p.config.PreMatch.RequestInterval - time.Since(startTime))
 		case <-time.After(p.config.PreMatch.RequestInterval):

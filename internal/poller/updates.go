@@ -28,10 +28,10 @@ type pollingInfo struct {
 }
 
 func (p *Poller) pollUpdates(ctx context.Context, logger *logrus.Entry, sportType pb.SportType) error {
-	logrus.Debug("polling updates")
+	logger.Debug("polling updates")
 
 	var (
-		lock     sync.RWMutex
+		lock     sync.Mutex
 		pollInfo = make(map[string]*pollingInfo)
 		errCh    = make(chan error)
 	)
@@ -42,7 +42,7 @@ func (p *Poller) pollUpdates(ctx context.Context, logger *logrus.Entry, sportTyp
 			hash := fmt.Sprintf(config.LiveEventsStorageKey, sportType)
 			ids, err := p.storage.GetEventsIds(ctx, hash)
 			if err != nil {
-				errCh <- err
+				errCh <- fmt.Errorf("failed to get events ids for updates polling: %s", err)
 				return
 			}
 			if len(ids) < 1 {
@@ -70,8 +70,8 @@ func (p *Poller) pollUpdates(ctx context.Context, logger *logrus.Entry, sportTyp
 					}
 					lock.Unlock()
 
-					// TODO: Remove time
-					ti := time.Now()
+					st := time.Now()
+
 					update, err := p.getUpdates(body, time.Second*60)
 					if err != nil {
 						errCh <- fmt.Errorf("failed to receive update: %s", err)
@@ -102,9 +102,10 @@ func (p *Poller) pollUpdates(ctx context.Context, logger *logrus.Entry, sportTyp
 					lock.Unlock()
 
 					logger.WithFields(logrus.Fields{
-						"start_time": ti,
-						"end_time":   time.Now(),
-					}).Debug("raw event received")
+						"event_id":   id,
+						"start_time": st,
+						"duration":   time.Since(st),
+					}).Debug("update received")
 				}()
 			}
 		}
@@ -150,7 +151,6 @@ func updateEvent(update *transform.Update, event *pb.Event) error {
 						if data.ID == o.ExternalId {
 							o.Odds.Numerator = u.LpNum
 							o.Odds.Denominator = u.LpDen
-							// TODO: Add more
 						}
 					}
 				}

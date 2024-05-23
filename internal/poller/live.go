@@ -45,10 +45,10 @@ func (p *Poller) pollLiveEvents(ctx context.Context, logger *logrus.Entry, sport
 
 			hash := fmt.Sprintf(config.LiveEventsStorageKey, sportType)
 			if err := p.storage.RemoveMissingEvents(ctx, hash, evs); err != nil {
-				return err
+				return fmt.Errorf("failed to remove missing live events: %s", err)
 			}
 			if err := p.storage.StoreNewEvents(ctx, hash, evs); err != nil {
-				return err
+				return fmt.Errorf("failed to store live events: %s", err)
 			}
 			<-time.After(p.config.Live.RequestInterval - time.Since(startTime))
 		case <-time.After(p.config.Live.RequestInterval):
