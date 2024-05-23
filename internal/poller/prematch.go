@@ -21,9 +21,13 @@ func (p *Poller) pollPreMatchEvents(ctx context.Context, logger *logrus.Entry, s
 			{8 * time.Hour, 32 * time.Hour},
 			{32 * time.Hour, 0}, // last element does not have an end time
 		}
-		eventsCh = make(chan []*pb.Event)
+		eventsCh   = make(chan []*pb.Event)
+		noEventsCh = make(chan struct{})
 	)
-	defer close(eventsCh)
+	defer func() {
+		close(eventsCh)
+		close(noEventsCh)
+	}()
 
 	for {
 		startTime = time.Now()
@@ -36,13 +40,17 @@ func (p *Poller) pollPreMatchEvents(ctx context.Context, logger *logrus.Entry, s
 				return
 			}
 			if len(evs) == 0 {
-				logger.Warn("no pre-match events polled")
+				noEventsCh <- struct{}{}
 				return
 			}
 			eventsCh <- evs
 		}()
 
 		select {
+		// if no events were polled, we want to retry after the request interval, this shouldn't happen for pre match events though
+		case <-noEventsCh:
+			logger.Warn("no pre-match events polled")
+			<-time.After(p.config.PreMatch.RequestInterval - time.Since(startTime))
 		case evs := <-eventsCh:
 			logger.WithField("length", len(evs)).Debug("pre-match events polled")
 

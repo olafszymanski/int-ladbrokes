@@ -18,9 +18,13 @@ func (p *Poller) pollLiveEvents(ctx context.Context, logger *logrus.Entry, sport
 		timePeriods = []timePeriod{
 			{-4 * time.Hour, 0}, // last (and first in this case) element does not have an end time
 		}
-		eventsCh = make(chan []*pb.Event)
+		eventsCh   = make(chan []*pb.Event)
+		noEventsCh = make(chan struct{})
 	)
-	defer close(eventsCh)
+	defer func() {
+		close(eventsCh)
+		close(noEventsCh)
+	}()
 
 	for {
 		startTime = time.Now()
@@ -33,13 +37,16 @@ func (p *Poller) pollLiveEvents(ctx context.Context, logger *logrus.Entry, sport
 				return
 			}
 			if len(evs) == 0 {
-				logger.Warn("no live events polled")
+				noEventsCh <- struct{}{}
 				return
 			}
 			eventsCh <- evs
 		}()
 
 		select {
+		// if no events were polled, we want to retry after the request interval
+		case <-noEventsCh:
+			<-time.After(p.config.Live.RequestInterval - time.Since(startTime))
 		case evs := <-eventsCh:
 			logger.WithField("length", len(evs)).Debug("live events polled")
 
