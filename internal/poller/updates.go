@@ -31,89 +31,99 @@ func (p *Poller) pollUpdates(ctx context.Context, logger *logrus.Entry, sportTyp
 	logger.Debug("polling updates")
 
 	var (
-		lock     sync.Mutex
+		lock     = sync.Mutex{}
+		hash     = fmt.Sprintf(config.LiveEventsStorageKey, sportType)
 		pollInfo = make(map[string]*pollingInfo)
+		idCh     = make(chan string)
 		errCh    = make(chan error)
 	)
 	defer close(errCh)
 
 	go func() {
 		for {
-			hash := fmt.Sprintf(config.LiveEventsStorageKey, sportType)
 			ids, err := p.storage.GetEventsIds(ctx, hash)
 			if err != nil {
 				errCh <- fmt.Errorf("failed to get events ids for updates polling: %s", err)
 				return
 			}
-			if len(ids) < 1 {
+			if len(ids) == 0 {
 				continue
 			}
 			for _, id := range ids {
 				id := id
 
-				lock.Lock()
-				if d, ok := pollInfo[id]; ok && d.polling {
-					lock.Unlock()
-					continue
-				} else if !ok {
-					pollInfo[id] = &pollingInfo{
-						polling: false,
-						body:    nil,
-					}
-				}
-
 				go func() {
-					pollInfo[id].polling = true
-					body := pollInfo[id].body
-					if pollInfo[id].body == nil {
-						body = []byte(fmt.Sprintf(defaultRequestBody, id))
-					}
-					lock.Unlock()
-
-					st := time.Now()
-
-					update, err := p.getUpdates(body, time.Second*60)
-					if err != nil {
-						errCh <- fmt.Errorf("failed to receive update: %s", err)
-						return
-					}
-					// no update received, we don't have to do anything
-					if update == nil {
-						return
-					}
-
-					ev, err := p.storage.GetEvent(ctx, hash, id)
-					if err != nil {
-						errCh <- fmt.Errorf("failed to get event from storage: %s", err)
-						return
-					}
-					if err := updateEvent(update, ev); err != nil {
-						errCh <- fmt.Errorf("failed to update event: %s", err)
-						return
-					}
-					if err := p.storage.StoreEvent(ctx, hash, ev); err != nil {
-						errCh <- fmt.Errorf("failed to save event: %s", err)
-						return
-					}
-
 					lock.Lock()
-					pollInfo[id].polling = false
-					pollInfo[id].body = getRequestBody(id, update.RequestBodyParts)
-					lock.Unlock()
-
-					logger.WithFields(logrus.Fields{
-						"event_id":   id,
-						"start_time": st,
-						"duration":   time.Since(st),
-					}).Debug("update received")
+					defer lock.Unlock()
+					if info, ok := pollInfo[id]; !ok {
+						pollInfo[id] = &pollingInfo{
+							polling: true,
+							body:    nil,
+						}
+						idCh <- id
+					} else if !info.polling {
+						pollInfo[id].polling = true
+						idCh <- id
+					}
 				}()
 			}
 		}
 	}()
-	if err := <-errCh; err != nil {
-		return err
+
+	for {
+		select {
+		case id := <-idCh:
+			go func() {
+				lock.Lock()
+				body := pollInfo[id].body
+				if body == nil {
+					body = []byte(fmt.Sprintf(defaultRequestBody, id))
+				}
+				lock.Unlock()
+
+				st := time.Now()
+
+				update, err := p.getUpdates(body, time.Second*60)
+				if err != nil {
+					errCh <- fmt.Errorf("failed to receive update: %s", err)
+					return
+				}
+				// no update received, we don't have to do anything
+				if update == nil {
+					logger.WithField("event_external_id", id).Debug("no update")
+					return
+				}
+
+				ev, err := p.storage.GetEvent(ctx, hash, id)
+				if err != nil {
+					errCh <- fmt.Errorf("failed to get event from storage: %s", err)
+					return
+				}
+				if err := updateEvent(update, ev); err != nil {
+					errCh <- fmt.Errorf("failed to update event: %s", err)
+					return
+				}
+				if err := p.storage.StoreEvent(ctx, hash, ev); err != nil {
+					errCh <- fmt.Errorf("failed to save event: %s", err)
+					return
+				}
+
+				lock.Lock()
+				pollInfo[id].polling = false
+				pollInfo[id].body = getRequestBody(id, update.RequestBodyParts)
+				lock.Unlock()
+
+				logger.WithFields(logrus.Fields{
+					"event_external_id": id,
+					"start_time":        st,
+					"duration":          time.Since(st),
+				}).Debug("update received")
+			}()
+			continue
+		case err := <-errCh:
+			return err
+		}
 	}
-	return nil
 }
 
 func (p *Poller) getUpdates(requestBody []byte, timeout time.Duration) (*transform.Update, error) {
