@@ -20,10 +20,12 @@ func (p *Poller) pollLiveEvents(ctx context.Context, logger *logrus.Entry, sport
 		}
 		eventsCh   = make(chan []*pb.Event)
 		noEventsCh = make(chan struct{})
+		errCh      = make(chan error)
 	)
 	defer func() {
 		close(eventsCh)
 		close(noEventsCh)
+		close(errCh)
 	}()
 
 	for {
@@ -33,7 +35,7 @@ func (p *Poller) pollLiveEvents(ctx context.Context, logger *logrus.Entry, sport
 			u := fmt.Sprintf("%s&%s", eventsUrl, liveFilter)
 			evs, err := p.pollEvents(ctx, u, sportType, p.config.Live.RequestTimeout, timePeriods)
 			if err != nil {
-				logger.WithError(err).Error("polling live events failed")
+				errCh <- fmt.Errorf("polling live events failed: %w", err)
 				return
 			}
 			if len(evs) == 0 {
@@ -60,6 +62,8 @@ func (p *Poller) pollLiveEvents(ctx context.Context, logger *logrus.Entry, sport
 			<-time.After(p.config.Live.RequestInterval - time.Since(startTime))
 		case <-time.After(p.config.Live.RequestInterval):
 			logger.Warn("live events polling took longer than expected")
+		case err := <-errCh:
+			return err
 		}
 	}
 }

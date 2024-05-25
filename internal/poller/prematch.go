@@ -23,10 +23,12 @@ func (p *Poller) pollPreMatchEvents(ctx context.Context, logger *logrus.Entry, s
 		}
 		eventsCh   = make(chan []*pb.Event)
 		noEventsCh = make(chan struct{})
+		errCh      = make(chan error)
 	)
 	defer func() {
 		close(eventsCh)
 		close(noEventsCh)
+		close(errCh)
 	}()
 
 	for {
@@ -36,7 +38,7 @@ func (p *Poller) pollPreMatchEvents(ctx context.Context, logger *logrus.Entry, s
 			u := fmt.Sprintf("%s&%s", eventsUrl, preMatchFilter)
 			evs, err := p.pollEvents(ctx, u, sportType, p.config.PreMatch.RequestTimeout, timePeriods)
 			if err != nil {
-				logger.WithError(err).Error("polling pre-match events failed")
+				errCh <- fmt.Errorf("polling pre-match events failed: %w", err)
 				return
 			}
 			if len(evs) == 0 {
@@ -64,6 +66,8 @@ func (p *Poller) pollPreMatchEvents(ctx context.Context, logger *logrus.Entry, s
 			<-time.After(p.config.PreMatch.RequestInterval - time.Since(startTime))
 		case <-time.After(p.config.PreMatch.RequestInterval):
 			logger.Warn("pre-match events polling took longer than expected")
+		case err := <-errCh:
+			return err
 		}
 	}
 }
