@@ -41,8 +41,8 @@ func (p *Poller) fetchEvents(baseUrl string, classes []byte, timeout time.Durati
 		errCh         = make(chan error)
 	)
 	defer func() {
-		close(errCh)
 		close(done)
+		close(errCh)
 	}()
 
 	wg.Add(requestsCount)
