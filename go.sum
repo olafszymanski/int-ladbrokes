@@ -126,6 +126,14 @@ github.com/nxadm/tail v1.4.4/go.mod h1:kenIhsEOeOJmVchQTgglprH7qJGnHDVpk1VPCcaMI
 github.com/nxadm/tail v1.4.8/go.mod h1:+ncqLTQzXmGhMZNUePPaPqPvBxHAIsmXswZKocGu+AU=
 github.com/olafszymanski/int-sdk v0.0.0-20240521214639-2d362584ae41 h1:Y6CFgewayWqTeUBhxMxHxOmPkZ9Yq4C7uIboLw6N3vU=
 github.com/olafszymanski/int-sdk v0.0.0-20240521214639-2d362584ae41/go.mod h1:vMCfuKdcGhdtfY0h5CsYPShAld3bgzGc1xVukWh4aKg=
+github.com/olafszymanski/int-sdk v0.0.0-20240522194941-94dda0399398 h1:kqAo82pzZfRoBiXasSMdxP3G1E7xfwSTy67viOigXDo=
+github.com/olafszymanski/int-sdk v0.0.0-20240522194941-94dda0399398/go.mod h1:vMCfuKdcGhdtfY0h5CsYPShAld3bgzGc1xVukWh4aKg=
+github.com/olafszymanski/int-sdk v0.0.0-20240522195609-e1ed8bcd085e h1:VNvMj+poK0jSRCpy40CMTh1Rjo4Yhq1Jj2Cg7gsf1eQ=
+github.com/olafszymanski/int-sdk v0.0.0-20240522195609-e1ed8bcd085e/go.mod h1:vMCfuKdcGhdtfY0h5CsYPShAld3bgzGc1xVukWh4aKg=
+github.com/olafszymanski/int-sdk v0.0.0-20240522200302-6fa6526262de h1:BHLn6yOoLnHpzDc0xNxGTWb+/uI4Vm+1/1sk6cRv/gE=
+github.com/olafszymanski/int-sdk v0.0.0-20240522200302-6fa6526262de/go.mod h1:vMCfuKdcGhdtfY0h5CsYPShAld3bgzGc1xVukWh4aKg=
+github.com/olafszymanski/int-sdk v0.0.0-20240523070024-7ae5b7f1ac91 h1:fQJ+lbDc79Zu2Cup1ceVi9RR4opWirnnnrMwsyoAINQ=
+github.com/olafszymanski/int-sdk v0.0.0-20240523070024-7ae5b7f1ac91/go.mod h1:vMCfuKdcGhdtfY0h5CsYPShAld3bgzGc1xVukWh4aKg=
 github.com/onsi/ginkgo v1.6.0/go.mod h1:lLunBs/Ym6LB5Z9jYTR76FiuTmxDTDusOGeTQH+WWjE=
 github.com/onsi/ginkgo v1.12.1/go.mod h1:zj2OWP4+oCPe1qIXoGWkgMRwljMUYCdkwsT2108oapk=
 github.com/onsi/ginkgo v1.16.4 h1:29JGrr5oVBm5ulCWet69zQkzWipVXIol6ygQUe/EzNc=

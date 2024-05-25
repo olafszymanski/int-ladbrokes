@@ -2,10 +2,10 @@ package storage
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/olafszymanski/int-sdk/integration/pb"
 	sdkStorage "github.com/olafszymanski/int-sdk/storage"
-	"google.golang.org/protobuf/proto"
 )
 
 type Storage struct {
@@ -27,87 +27,92 @@ func (s *Storage) GetClasses(ctx context.Context, key string) ([]byte, error) {
 }
 
 func (s *Storage) StoreClasses(ctx context.Context, key string, classes []byte) error {
-	return s.storage.Store(ctx, key, classes, 0)
+	return s.storage.Set(ctx, key, classes, 0)
 }
 
 func (s *Storage) GetEvent(ctx context.Context, hash, id string) (*pb.Event, error) {
-	raw, err := s.storage.GetHashField(ctx, hash, id)
+	raw, err := s.storage.GetMapValue(ctx, hash, id)
 	if err != nil {
 		return nil, err
 	}
-	ev := &pb.Event{}
-	if err := proto.Unmarshal(raw, ev); err != nil {
+
+	var ev pb.Event
+	if err := json.Unmarshal(raw, &ev); err != nil {
 		return nil, err
 	}
-	return ev, nil
+	return &ev, nil
 }
 
 func (s *Storage) StoreEvent(ctx context.Context, hash string, event *pb.Event) error {
-	raw, err := proto.Marshal(event)
+	raw, err := json.Marshal(event)
 	if err != nil {
 		return err
 	}
-	return s.storage.StoreHashField(ctx, hash, event.ExternalId, raw)
+	return s.storage.SetMapValue(ctx, hash, event.ExternalId, raw)
 }
 
 func (s *Storage) GetEvents(ctx context.Context, hash string) ([]*pb.Event, error) {
-	raw, err := s.storage.GetHashFields(ctx, hash)
+	raw, err := s.storage.GetMapValues(ctx, hash)
 	if err != nil {
 		return nil, err
 	}
-	ev := make([]*pb.Event, 0, len(raw))
+
+	evs := make([]*pb.Event, 0, len(raw))
 	for _, r := range raw {
-		e := &pb.Event{}
-		if err := proto.Unmarshal(r, e); err != nil {
+		var ev pb.Event
+		if err := json.Unmarshal(r, &ev); err != nil {
 			return nil, err
 		}
-		ev = append(ev, e)
+		evs = append(evs, &ev)
 	}
-	return ev, nil
+	return evs, nil
 }
 
 func (s *Storage) StoreEvents(ctx context.Context, hash string, events []*pb.Event) error {
-	rawEvs := make(map[string][]byte, len(events))
+	rawEvs := make(map[string]any, len(events))
 	for _, e := range events {
-		raw, err := proto.Marshal(e)
+		raw, err := json.Marshal(e)
 		if err != nil {
 			return err
 		}
 		rawEvs[e.ExternalId] = raw
 	}
-	return s.storage.StoreHashFields(ctx, hash, rawEvs)
+	return s.storage.SetMapValues(ctx, hash, rawEvs)
 }
 
 func (s *Storage) StoreNewEvents(ctx context.Context, hash string, events []*pb.Event) error {
-	currIds, err := s.GetEventsIds(ctx, hash)
+	ids, err := s.GetEventsIds(ctx, hash)
 	if err != nil {
 		return err
 	}
-	newEvents := getNewEvents(events, currIds)
-	if len(newEvents) == 0 {
+	new := getNewEvents(events, ids)
+	if len(new) == 0 {
 		return nil
 	}
-	return s.StoreEvents(ctx, hash, newEvents)
+	return s.StoreEvents(ctx, hash, new)
 }
 
 func (s *Storage) DeleteEvents(ctx context.Context, hash string, ids []string) error {
-	return s.storage.DeleteHashFields(ctx, hash, ids)
+	if err := s.storage.DeleteMapKeys(ctx, hash, ids); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *Storage) GetEventsIds(ctx context.Context, hash string) ([]string, error) {
-	return s.storage.GetHashFieldKeys(ctx, hash)
+	return s.storage.GetMapKeys(ctx, hash)
 }
 
 func (s *Storage) RemoveMissingEvents(ctx context.Context, hash string, events []*pb.Event) error {
-	currIds, err := s.GetEventsIds(ctx, hash)
+	curr, err := s.GetEventsIds(ctx, hash)
 	if err != nil {
 		return err
 	}
-	missIds := getMissingEventsIds(events, currIds)
-	if len(missIds) == 0 {
+	miss := getMissingEventsIds(events, curr)
+	if len(miss) == 0 {
 		return nil
 	}
-	return s.DeleteEvents(ctx, hash, missIds)
+	return s.DeleteEvents(ctx, hash, miss)
 }
 
 func getNewEvents(events []*pb.Event, currentEventsIds []string) []*pb.Event {
