@@ -7,7 +7,7 @@ services:
     volumes: 
       - cache:/data
     restart: always
-  api:
+  app:
     container_name: int-ladbrokes
     build:
       context: .
