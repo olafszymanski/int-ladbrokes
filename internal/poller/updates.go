@@ -3,7 +3,10 @@ package poller
 import (
 	"context"
 	"fmt"
+	"math"
 	"net/http"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -91,18 +94,25 @@ func (p *Poller) pollUpdates(ctx context.Context, logger *logrus.Entry, sportTyp
 				// no update received, we don't have to do anything
 				if update == nil {
 					logger.WithField("event_external_id", id).Debug("no update")
+					lock.Lock()
+					pollInfo[id].polling = false
+					lock.Unlock()
 					return
 				}
 
 				ev, err := p.storage.GetEvent(ctx, hash, id)
 				if err != nil {
-					errCh <- fmt.Errorf("failed to get event from storage: %s", err)
+					logger.WithField("event_external_id", id).WithError(err).Warn("event not found in storage, probably finished and removed")
+					lock.Lock()
+					pollInfo[id].polling = false
+					lock.Unlock()
 					return
 				}
-				if err := updateEvent(update, ev); err != nil {
+				if err := p.updateEvent(ctx, logger, update, hash, ev); err != nil {
 					errCh <- fmt.Errorf("failed to update event: %s", err)
 					return
 				}
+				// Shouldn't store when finished
 				if err := p.storage.StoreEvent(ctx, hash, ev); err != nil {
 					errCh <- fmt.Errorf("failed to save event: %s", err)
 					return
@@ -142,32 +152,192 @@ func (p *Poller) getUpdates(requestBody []byte, timeout time.Duration) (*transfo
 	return transform.TransformUpdates(res.Body)
 }
 
-func updateEvent(update *transform.Update, event *pb.Event) error {
+func (p *Poller) updateEvent(ctx context.Context, logger *logrus.Entry, update *transform.Update, hash string, event *pb.Event) error {
 	for t, update := range update.Data {
 		for _, data := range update {
 			switch t {
-			// case mapping.EventUpdateType:
-			// 	u, err := transform.UnmarshalUpdate[model.EventUpdate](data.RawData)
-			// 	if err != nil {
-			// 		return fmt.Errorf("failed to unmarshal update: %s", err)
-			// 	}
+			case mapping.EventUpdateType:
+				u, err := transform.UnmarshalUpdate[model.EventUpdate](data.RawData)
+				if err != nil {
+					return fmt.Errorf("failed to unmarshal event update: %s", err)
+				}
+				if err := p.handleEventUpdate(ctx, u, data.ID, hash, event); err != nil {
+					return fmt.Errorf("failed to handle event update: %s", err)
+				}
+			case mapping.MarketUpdateType:
+				u, err := transform.UnmarshalUpdate[model.MarketUpdate](data.RawData)
+				if err != nil {
+					return fmt.Errorf("failed to unmarshal market update: %s", err)
+				}
+				handleMarketUpdate(logger, u, data.ID, event)
+			case mapping.SelectionUpdateType:
+				u, err := transform.UnmarshalUpdate[model.SelectionUpdate](data.RawData)
+				if err != nil {
+					return fmt.Errorf("failed to unmarshal selection update: %s", err)
+				}
+				if err := handleSelectionUpdate(u, data.ID, event); err != nil {
+					return fmt.Errorf("failed to handle selection update: %s", err)
+				}
 			case mapping.PriceUpdateType:
 				u, err := transform.UnmarshalUpdate[model.PriceUpdate](data.RawData)
 				if err != nil {
-					return fmt.Errorf("failed to unmarshal update: %s", err)
+					return fmt.Errorf("failed to unmarshal price update: %s", err)
 				}
-				for _, m := range event.Markets {
-					for _, o := range m.Outcomes {
-						if data.ID == o.ExternalId {
-							o.Odds.Numerator = u.LpNum
-							o.Odds.Denominator = u.LpDen
-						}
-					}
+				if err := handlePriceUpdate(u, data.ID, event); err != nil {
+					return fmt.Errorf("failed to handle price update: %s", err)
 				}
 			}
 		}
 	}
 	return nil
+}
+
+func (p *Poller) handleEventUpdate(ctx context.Context, update *model.EventUpdate, updateId, hash string, event *pb.Event) error {
+	if !transform.IsEventFinished(update) {
+		return nil
+	}
+	if err := p.storage.DeleteEvents(ctx, hash, []string{updateId}); err != nil { // TODO: Create DeleteEvent method
+		return fmt.Errorf("failed to remove finished event (%s) from storage: %s", event.ExternalId, err)
+	}
+	return nil
+}
+
+func handleMarketUpdate(logger *logrus.Entry, update *model.MarketUpdate, updateId string, event *pb.Event) {
+	found := false
+
+	for i, m := range event.Markets {
+		if updateId != m.ExternalId {
+			continue
+		}
+
+		var (
+			ok         bool
+			marketType = mapping.MoneyLineMarketType
+		)
+		if update.GroupNames != nil {
+			marketType, ok = update.GroupNames["en"]
+			if !ok {
+				logger.WithField("group_names", update.GroupNames).Error("market update group names map changed")
+				continue
+			}
+		}
+
+		if _, ok := mapping.MarketTypes[marketType]; !ok {
+			// TODO: Add check for unknown market types
+			logger.WithField("market_type", marketType).Warn("unknown market type")
+			continue
+		}
+
+		if transform.IsMarketRemoved(update) {
+			event.Markets = append(event.Markets[:i], event.Markets[i+1:]...)
+			return
+		}
+
+		a := !transform.IsMarketSuspended(update)
+		for _, o := range m.Outcomes {
+			o.IsAvailable = a
+		}
+
+		found = true
+	}
+
+	if !found {
+		var (
+			name           = ""
+			marketType, ok = mapping.MarketTypes[update.GroupNames["en"]]
+		)
+		if !ok {
+			// TODO: Add check for unknown market types
+			logger.WithField("group_names", update.GroupNames).Warn("unknown market type")
+			return
+		}
+		if marketType == pb.MarketType_PLAYER_TOTAL_POINTS || marketType == pb.MarketType_PLAYER_TOTAL_ASSISTS ||
+			marketType == pb.MarketType_PLAYER_TOTAL_REBOUNDS || marketType == pb.MarketType_PLAYER_TOTAL_3_POINTERS {
+			name = strings.Split(update.Names["en"], " (")[0]
+		}
+
+		mk := &pb.Market{
+			Type:       marketType,
+			ExternalId: updateId,
+			Outcomes:   []*pb.Outcome{},
+		}
+		if name != "" {
+			mk.Name = &name
+		}
+		event.Markets = append(event.Markets, mk)
+	}
+}
+
+func handleSelectionUpdate(update *model.SelectionUpdate, updateId string, event *pb.Event) error {
+	// b, _ := json.MarshalIndent(update, "", "  ")
+	// fmt.Println("selec update for", update.EvMktID, updateId, string(b))
+	for _, m := range event.Markets {
+		if fmt.Sprint(update.EvMktID) != m.ExternalId {
+			continue
+		}
+
+		if len(m.Outcomes) == 0 {
+			n := update.Names["en"]
+			m.Outcomes = append(m.Outcomes, &pb.Outcome{
+				Type:        pb.Outcome_COMPETITOR,
+				ExternalId:  updateId,
+				Odds:        &pb.Odds{},
+				Name:        &n,
+				IsAvailable: !transform.IsSelectionSuspended(update),
+			})
+		}
+		for _, outcome := range m.Outcomes {
+			if updateId != outcome.ExternalId {
+				continue
+			}
+			outcome.IsAvailable = !transform.IsSelectionSuspended(update)
+			return updateOdds(outcome, update.LpNum, update.LpDen)
+		}
+	}
+	return nil
+}
+
+func handlePriceUpdate(update *model.PriceUpdate, updateId string, event *pb.Event) error {
+	for _, m := range event.Markets {
+		for _, outcome := range m.Outcomes {
+			if updateId != outcome.ExternalId {
+				continue
+			}
+			return updateOdds(outcome, update.LpNum, update.LpDen)
+		}
+	}
+	return nil
+}
+
+func updateOdds(outcome *pb.Outcome, numerator, denominator string) error {
+	outcome.Odds.Numerator = numerator
+	outcome.Odds.Denominator = denominator
+
+	num, den, err := getFractionalOdds(numerator, denominator)
+	if err != nil {
+		return fmt.Errorf("failed to get fractional odds from update: %s", err)
+	}
+	res := num / den
+
+	outcome.Odds.Decimal = math.Floor(res*100)/100 + 1
+	if res > 1 {
+		outcome.Odds.American = fmt.Sprint(math.Round(res * 100))
+		return nil
+	}
+	outcome.Odds.American = fmt.Sprint(math.Round(-100 / res))
+	return nil
+}
+
+func getFractionalOdds(numerator, denominator string) (float64, float64, error) {
+	num, err := strconv.ParseFloat(numerator, 64)
+	if err != nil {
+		return 0, 0, err
+	}
+	den, err := strconv.ParseFloat(denominator, 64)
+	if err != nil {
+		return 0, 0, err
+	}
+	return num, den, nil
 }
 
 func getRequestBody(id string, requestBodyParts []string) []byte {

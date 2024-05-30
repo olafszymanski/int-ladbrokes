@@ -1,0 +1,169 @@
+{
+    "SSResponse": {
+        "xmlns": "http://schema.openbet.com/SiteServer/2.81/SSResponse.xsd",
+        "children": [
+            {
+                "event": {
+                    "id": "241631428",
+                    "name": "2023/2024 Spanish ACB",
+                    "eventStatusCode": "A",
+                    "isActive": "true",
+                    "isDisplayed": "true",
+                    "displayOrder": "0",
+                    "siteChannels": "p,P,Q,R,C,I,M,",
+                    "eventSortCode": "TNMT",
+                    "startTime": "2024-06-30T19:00:00Z",
+                    "suspendAtTime": "2024-03-09T17:00:00Z",
+                    "rawIsOffCode": "-",
+                    "classId": "47",
+                    "typeId": "130",
+                    "sportId": "6",
+                    "liveServChannels": "sEVENT0241631428,",
+                    "liveServChildrenChannels": "SEVENT0241631428,",
+                    "categoryId": "6",
+                    "categoryCode": "BASKETBALL",
+                    "categoryName": "Basketball",
+                    "categoryDisplayOrder": "-10005",
+                    "className": "Spanish",
+                    "classDisplayOrder": "-9298",
+                    "classSortCode": "ST",
+                    "typeName": "Spanish ACB",
+                    "typeDisplayOrder": "-1650",
+                    "typeFlagCodes": "GVA,IVA,PVA,",
+                    "isOpenEvent": "true",
+                    "isAvailable": "true",
+                    "fixedOddsAvail": "true",
+                    "cashoutAvail": "Y",
+                    "isBettable": "true",
+                    "children": [
+                        {
+                            "market": {
+                                "id": "757252280",
+                                "eventId": "241631428",
+                                "templateMarketId": "6851",
+                                "templateMarketName": "Outright",
+                                "marketMeaningMajorCode": "-",
+                                "marketMeaningMinorCode": "--",
+                                "name": "Competition Winner",
+                                "isLpAvailable": "true",
+                                "displayOrder": "0",
+                                "marketStatusCode": "A",
+                                "isActive": "true",
+                                "isDisplayed": "true",
+                                "fixedOddsAvail": "true",
+                                "siteChannels": "p,P,Q,R,C,I,M,",
+                                "liveServChannels": "sEVMKT0757252280,",
+                                "liveServChildrenChannels": "SEVMKT0757252280,",
+                                "priceTypeCodes": "LP,",
+                                "isBettable": "true",
+                                "isAvailable": "true",
+                                "maxAccumulators": "1",
+                                "minAccumulators": "1",
+                                "cashoutAvail": "N",
+                                "termsWithBet": "N",
+                                "children": [
+                                    {
+                                        "outcome": {
+                                            "id": "2076758215",
+                                            "marketId": "757252280",
+                                            "name": "Baskonia",
+                                            "outcomeMeaningMajorCode": "--",
+                                            "displayOrder": "0",
+                                            "outcomeStatusCode": "A",
+                                            "isActive": "true",
+                                            "isDisplayed": "true",
+                                            "siteChannels": "p,P,Q,R,C,I,M,",
+                                            "fixedOddsAvail": "true",
+                                            "liveServChannels": "sSELCN2076758215,",
+                                            "liveServChildrenChannels": "SSELCN2076758215,",
+                                            "isAvailable": "true",
+                                            "cashoutAvail": "N",
+                                            "children": [
+                                                {
+                                                    "price": {
+                                                        "id": "2",
+                                                        "priceType": "LP",
+                                                        "priceNum": "33",
+                                                        "priceDen": "1",
+                                                        "priceDec": "34.00",
+                                                        "priceAmerican": "3300",
+                                                        "isActive": "true",
+                                                        "displayOrder": "1"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "outcome": {
+                                            "id": "2076758217",
+                                            "marketId": "757252280",
+                                            "name": "Basquet Girona",
+                                            "outcomeMeaningMajorCode": "--",
+                                            "displayOrder": "0",
+                                            "outcomeStatusCode": "A",
+                                            "isActive": "true",
+                                            "isDisplayed": "true",
+                                            "siteChannels": "p,P,Q,R,C,I,M,",
+                                            "fixedOddsAvail": "true",
+                                            "liveServChannels": "sSELCN2076758217,",
+                                            "liveServChildrenChannels": "SSELCN2076758217,",
+                                            "isAvailable": "true",
+                                            "cashoutAvail": "N",
+                                            "children": [
+                                                {
+                                                    "price": {
+                                                        "id": "3",
+                                                        "priceType": "LP",
+                                                        "priceNum": "100",
+                                                        "priceDen": "1",
+                                                        "priceDec": "101.00",
+                                                        "priceAmerican": "10000",
+                                                        "isActive": "true",
+                                                        "displayOrder": "1"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    {
+                                        "outcome": {
+                                            "id": "2076758218",
+                                            "marketId": "757252280",
+                                            "name": "Baxi Manresa",
+                                            "outcomeMeaningMajorCode": "--",
+                                            "displayOrder": "0",
+                                            "outcomeStatusCode": "A",
+                                            "isActive": "true",
+                                            "isDisplayed": "true",
+                                            "siteChannels": "p,P,Q,R,C,I,M,",
+                                            "fixedOddsAvail": "true",
+                                            "liveServChannels": "sSELCN2076758218,",
+                                            "liveServChildrenChannels": "SSELCN2076758218,",
+                                            "isAvailable": "true",
+                                            "cashoutAvail": "N",
+                                            "children": [
+                                                {
+                                                    "price": {
+                                                        "id": "4",
+                                                        "priceType": "LP",
+                                                        "priceNum": "100",
+                                                        "priceDen": "1",
+                                                        "priceDec": "101.00",
+                                                        "priceAmerican": "10000",
+                                                        "isActive": "true",
+                                                        "displayOrder": "1"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

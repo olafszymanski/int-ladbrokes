@@ -1,0 +1,10 @@
+{
+    "SSResponse": {
+        "xmlns": "http://schema.openbet.com/SiteServer/2.81/SSResponse.xsd",
+        "children": [
+            {
+                INVALID
+            }
+        ]
+    }
+}

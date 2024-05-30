@@ -1,0 +1,78 @@
+pass logger to transformer or bring back transformer struct
+fix errors in transformer
+check if update indicates finished event
+fix transformer updates
+fix unhandled market types
+add fixed database of teams and leagues
+change model to responses and move funcs
+fix transformer suspended status
+fix transformer 3rd quarter/spread/totals
+get proper market type
+
+{
+    "market": {
+        "id": "835801449",
+        "eventId": "244905944",
+        "templateMarketId": "5906369",
+        "templateMarketName": "Quarter Money Line",
+        "dispSortId": "1673",
+        "dispSortName": "2W",
+        "collectionIds": "82904,",
+        "collectionNames": "Quarter Markets,",
+        "marketMeaningMajorCode": "-",
+        "marketMeaningMinorCode": "HH",
+        "name": "3rd Quarter Money Line",
+        "isLpAvailable": "true",
+        "isMarketBetInRun": "true",
+        "displayOrder": "3500",
+        "marketStatusCode": "A",
+        "isActive": "true",
+        "isDisplayed": "true",
+        "fixedOddsAvail": "true",
+        "siteChannels": "p,P,Q,R,C,I,M,",
+        "liveServChannels": "sEVMKT0835801449,",
+        "liveServChildrenChannels": "SEVMKT0835801449,",
+        "priceTypeCodes": "LP,",
+        "isBettable": "true",
+        "isAvailable": "true",
+        "maxAccumulators": "25",
+        "minAccumulators": "1",
+        "cashoutAvail": "N",
+        "termsWithBet": "N",
+        "children": [
+            {
+                "outcome": {
+                    "id": "2385100465",
+                    "marketId": "835801449",
+                    "name": "Alges e Dafundo Women",
+                    "outcomeMeaningMajorCode": "HH",
+                    "outcomeMeaningMinorCode": "H",
+                    "displayOrder": "1",
+                    "outcomeStatusCode": "A",
+                    "isActive": "true",
+                    "isDisplayed": "true",
+                    "siteChannels": "p,P,Q,R,C,I,M,",
+                    "fixedOddsAvail": "true",
+                    "liveServChannels": "sSELCN2385100465,",
+                    "liveServChildrenChannels": "SSELCN2385100465,",
+                    "isAvailable": "true",
+                    "cashoutAvail": "N",
+                    "children": [
+                        {
+                            "price": {
+                                "id": "76",
+                                "priceType": "LP",
+                                "priceNum": "4",
+                                "priceDen": "9",
+                                "priceDec": "1.44",
+                                "priceAmerican": "-225",
+                                "isActive": "true",
+                                "displayOrder": "1"
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

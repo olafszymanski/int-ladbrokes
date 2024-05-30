@@ -1,0 +1,134 @@
+// Suspended
+market update {
+int-ladbrokes  |   "names": {
+int-ladbrokes  |     "en": "4th Quarter Total Points 41.5"
+int-ladbrokes  |   },
+int-ladbrokes  |   "group_names": {
+int-ladbrokes  |     "en": "Quarter Total Points"
+int-ladbrokes  |   },
+int-ladbrokes  |   "hcap_values": {
+int-ladbrokes  |     "B": "41.5",
+int-ladbrokes  |     "E": "41.5",
+int-ladbrokes  |     "H": "41.5",
+int-ladbrokes  |     "L": "41.5"
+int-ladbrokes  |   },
+int-ladbrokes  |   "ev_oc_grp_id": "2952416",
+int-ladbrokes  |   "mkt_disp_code": "2W",
+int-ladbrokes  |   "mkt_disp_layout_columns": "2",
+int-ladbrokes  |   "mkt_disp_layout_order": "DISPORDER",
+int-ladbrokes  |   "mkt_type": "L",
+int-ladbrokes  |   "mkt_sort": "HL",
+int-ladbrokes  |   "mkt_grp_flags": "",
+int-ladbrokes  |   "status": "S",
+int-ladbrokes  |   "displayed": "Y",
+int-ladbrokes  |   "bir_index": "",
+int-ladbrokes  |   "raw_hcap": "41.5",
+int-ladbrokes  |   "ew_avail": "N",
+int-ladbrokes  |   "ew_places": "",
+int-ladbrokes  |   "ew_fac_num": "",
+int-ladbrokes  |   "ew_fac_den": "",
+int-ladbrokes  |   "bet_in_run": "Y",
+int-ladbrokes  |   "lp_avail": "Y",
+int-ladbrokes  |   "sp_avail": "N",
+int-ladbrokes  |   "fc_avail": "N",
+int-ladbrokes  |   "tc_avail": "N",
+int-ladbrokes  |   "mm_coll_id": "82892",
+int-ladbrokes  |   "suspend_at": "",
+int-ladbrokes  |   "collections": [
+int-ladbrokes  |     {
+int-ladbrokes  |       "collection_id": "82904"
+int-ladbrokes  |     }
+int-ladbrokes  |   ],
+int-ladbrokes  |   "ev_id": 244866909,
+int-ladbrokes  |   "disporder": 3700
+int-ladbrokes  | }
+
+// Removed
+int-ladbrokes  | market update {
+int-ladbrokes  |   "names": {
+int-ladbrokes  |     "en": "4th Quarter Total Points 41.5"
+int-ladbrokes  |   },
+int-ladbrokes  |   "group_names": {
+int-ladbrokes  |     "en": "Quarter Total Points"
+int-ladbrokes  |   },
+int-ladbrokes  |   "hcap_values": {
+int-ladbrokes  |     "B": "41.5",
+int-ladbrokes  |     "E": "41.5",
+int-ladbrokes  |     "H": "41.5",
+int-ladbrokes  |     "L": "41.5"
+int-ladbrokes  |   },
+int-ladbrokes  |   "ev_oc_grp_id": "2952416",
+int-ladbrokes  |   "mkt_disp_code": "2W",
+int-ladbrokes  |   "mkt_disp_layout_columns": "2",
+int-ladbrokes  |   "mkt_disp_layout_order": "DISPORDER",
+int-ladbrokes  |   "mkt_type": "L",
+int-ladbrokes  |   "mkt_sort": "HL",
+int-ladbrokes  |   "mkt_grp_flags": "",
+int-ladbrokes  |   "status": "S",
+int-ladbrokes  |   "displayed": "N",
+int-ladbrokes  |   "bir_index": "",
+int-ladbrokes  |   "raw_hcap": "41.5",
+int-ladbrokes  |   "ew_avail": "N",
+int-ladbrokes  |   "ew_places": "",
+int-ladbrokes  |   "ew_fac_num": "",
+int-ladbrokes  |   "ew_fac_den": "",
+int-ladbrokes  |   "bet_in_run": "Y",
+int-ladbrokes  |   "lp_avail": "Y",
+int-ladbrokes  |   "sp_avail": "N",
+int-ladbrokes  |   "fc_avail": "N",
+int-ladbrokes  |   "tc_avail": "N",
+int-ladbrokes  |   "mm_coll_id": "82892",
+int-ladbrokes  |   "suspend_at": "",
+int-ladbrokes  |   "collections": [
+int-ladbrokes  |     {
+int-ladbrokes  |       "collection_id": "82904"
+int-ladbrokes  |     }
+int-ladbrokes  |   ],
+int-ladbrokes  |   "ev_id": 244866909,
+int-ladbrokes  |   "disporder": 3700
+int-ladbrokes  | }
+
+// Added
+int-ladbrokes  | market update {
+int-ladbrokes  |   "names": {
+int-ladbrokes  |     "en": "4th Quarter Total Points 40.5"
+int-ladbrokes  |   },
+int-ladbrokes  |   "group_names": {
+int-ladbrokes  |     "en": "Quarter Total Points"
+int-ladbrokes  |   },
+int-ladbrokes  |   "hcap_values": {
+int-ladbrokes  |     "B": "40.5",
+int-ladbrokes  |     "E": "40.5",
+int-ladbrokes  |     "H": "40.5",
+int-ladbrokes  |     "L": "40.5"
+int-ladbrokes  |   },
+int-ladbrokes  |   "ev_oc_grp_id": "2952416",
+int-ladbrokes  |   "mkt_disp_code": "2W",
+int-ladbrokes  |   "mkt_disp_layout_columns": "2",
+int-ladbrokes  |   "mkt_disp_layout_order": "DISPORDER",
+int-ladbrokes  |   "mkt_type": "L",
+int-ladbrokes  |   "mkt_sort": "HL",
+int-ladbrokes  |   "mkt_grp_flags": "",
+int-ladbrokes  |   "status": "S",
+int-ladbrokes  |   "displayed": "Y",
+int-ladbrokes  |   "bir_index": "",
+int-ladbrokes  |   "raw_hcap": "40.5",
+int-ladbrokes  |   "ew_avail": "N",
+int-ladbrokes  |   "ew_places": "",
+int-ladbrokes  |   "ew_fac_num": "",
+int-ladbrokes  |   "ew_fac_den": "",
+int-ladbrokes  |   "bet_in_run": "Y",
+int-ladbrokes  |   "lp_avail": "Y",
+int-ladbrokes  |   "sp_avail": "N",
+int-ladbrokes  |   "fc_avail": "N",
+int-ladbrokes  |   "tc_avail": "N",
+int-ladbrokes  |   "mm_coll_id": "82892",
+int-ladbrokes  |   "suspend_at": "",
+int-ladbrokes  |   "collections": [
+int-ladbrokes  |     {
+int-ladbrokes  |       "collection_id": "82904"
+int-ladbrokes  |     }
+int-ladbrokes  |   ],
+int-ladbrokes  |   "ev_id": 244866909,
+int-ladbrokes  |   "disporder": 3700
+int-ladbrokes  | }

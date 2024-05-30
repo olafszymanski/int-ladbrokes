@@ -1,0 +1,182 @@
+[
+    "IN_PLAY_SPORTS::6::LIVE_EVENT",
+    [
+        {
+            "categoryId": 6,
+            "topLevelType": "LIVE_EVENT",
+            "showInPlay": true,
+            "categoryName": "Basketball",
+            "categoryCode": "BASKETBALL",
+            "categoryPath": "basketball",
+            "eventsByTypeName": [
+                {
+                    "className": "Filipino",
+                    "categoryName": "Basketball",
+                    "categoryCode": "BASKETBALL",
+                    "typeName": "MPBL Men's",
+                    "typeId": "128064",
+                    "classDisplayOrder": -9296,
+                    "typeDisplayOrder": -5500,
+                    "typeSectionTitleAllSports": "Filipino - MPBL Men's",
+                    "typeSectionTitleOneSport": "Filipino - MPBL Men's",
+                    "typeSectionTitleConnectApp": "MPBL Men's",
+                    "eventCount": 1,
+                    "eventsIds": [
+                        244731076
+                    ]
+                },
+                {
+                    "className": "Malaysian",
+                    "categoryName": "Basketball",
+                    "categoryCode": "BASKETBALL",
+                    "typeName": "U20 D-League - Men's",
+                    "typeId": "129036",
+                    "classDisplayOrder": -9248,
+                    "typeDisplayOrder": -5500,
+                    "typeSectionTitleAllSports": "Malaysian - U20 D-League - Men's",
+                    "typeSectionTitleOneSport": "Malaysian - U20 D-League - Men's",
+                    "typeSectionTitleConnectApp": "U20 D-League - Men's",
+                    "eventCount": 1,
+                    "eventsIds": [
+                        244731083
+                    ]
+                }
+            ],
+            "eventsIds": [
+                244731076,
+                244731083
+            ],
+            "displayOrder": -10005,
+            "sportUri": "sport/basketball",
+            "svgId": "basketball",
+            "eventCount": 2,
+            "marketSelectorOptions": [
+                "Main Market",
+                "Money Line",
+                "Total Points",
+                "Handicap 2-way",
+                "Half Total Points",
+                "Quarter Total Points"
+            ],
+            "marketSelector": "Money Line"
+        },
+        {
+            "categoryId": 6,
+            "topLevelType": "LIVE_EVENT",
+            "showInPlay": true,
+            "categoryName": "Basketball",
+            "categoryCode": "BASKETBALL",
+            "categoryPath": "basketball",
+            "eventsByTypeName": [
+                {
+                    "className": "Filipino",
+                    "categoryName": "Basketball",
+                    "categoryCode": "BASKETBALL",
+                    "typeName": "MPBL Men's",
+                    "typeId": "128064",
+                    "classDisplayOrder": -9296,
+                    "typeDisplayOrder": -5500,
+                    "typeSectionTitleAllSports": "Filipino - MPBL Men's",
+                    "typeSectionTitleOneSport": "Filipino - MPBL Men's",
+                    "typeSectionTitleConnectApp": "MPBL Men's",
+                    "eventCount": 1,
+                    "eventsIds": [
+                        244731076
+                    ]
+                },
+                {
+                    "className": "Malaysian",
+                    "categoryName": "Basketball",
+                    "categoryCode": "BASKETBALL",
+                    "typeName": "U20 D-League - Men's",
+                    "typeId": "129036",
+                    "classDisplayOrder": -9248,
+                    "typeDisplayOrder": -5500,
+                    "typeSectionTitleAllSports": "Malaysian - U20 D-League - Men's",
+                    "typeSectionTitleOneSport": "Malaysian - U20 D-League - Men's",
+                    "typeSectionTitleConnectApp": "U20 D-League - Men's",
+                    "eventCount": 1,
+                    "eventsIds": [
+                        244731083
+                    ]
+                }
+            ],
+            "eventsIds": [
+                244731076,
+                244731083
+            ],
+            "displayOrder": -10005,
+            "sportUri": "sport/basketball",
+            "svgId": "basketball",
+            "eventCount": 2,
+            "marketSelectorOptions": [
+                "Main Market",
+                "Money Line",
+                "Total Points",
+                "Handicap 2-way",
+                "Half Total Points",
+                "Quarter Total Points"
+            ],
+            "marketSelector": "Handicap 2-way"
+        },
+        {
+            "categoryId": 6,
+            "topLevelType": "LIVE_EVENT",
+            "showInPlay": true,
+            "categoryName": "Basketball",
+            "categoryCode": "BASKETBALL",
+            "categoryPath": "basketball",
+            "eventsByTypeName": [
+                {
+                    "className": "Filipino",
+                    "categoryName": "Basketball",
+                    "categoryCode": "BASKETBALL",
+                    "typeName": "MPBL Men's",
+                    "typeId": "128064",
+                    "classDisplayOrder": -9296,
+                    "typeDisplayOrder": -5500,
+                    "typeSectionTitleAllSports": "Filipino - MPBL Men's",
+                    "typeSectionTitleOneSport": "Filipino - MPBL Men's",
+                    "typeSectionTitleConnectApp": "MPBL Men's",
+                    "eventCount": 1,
+                    "eventsIds": [
+                        244731076
+                    ]
+                },
+                {
+                    "className": "Malaysian",
+                    "categoryName": "Basketball",
+                    "categoryCode": "BASKETBALL",
+                    "typeName": "U20 D-League - Men's",
+                    "typeId": "129036",
+                    "classDisplayOrder": -9248,
+                    "typeDisplayOrder": -5500,
+                    "typeSectionTitleAllSports": "Malaysian - U20 D-League - Men's",
+                    "typeSectionTitleOneSport": "Malaysian - U20 D-League - Men's",
+                    "typeSectionTitleConnectApp": "U20 D-League - Men's",
+                    "eventCount": 1,
+                    "eventsIds": [
+                        244731083
+                    ]
+                }
+            ],
+            "eventsIds": [
+                244731076,
+                244731083
+            ],
+            "displayOrder": -10005,
+            "sportUri": "sport/basketball",
+            "svgId": "basketball",
+            "eventCount": 2,
+            "marketSelectorOptions": [
+                "Main Market",
+                "Money Line",
+                "Total Points",
+                "Handicap 2-way",
+                "Half Total Points",
+                "Quarter Total Points"
+            ],
+            "marketSelector": "Total Points"
+        }
+    ]
+]

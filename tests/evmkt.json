@@ -1,0 +1,55 @@
+42[
+    "244587784",
+    {
+        "publishedDate": "2024-05-08T18:07:38.375",
+        "type": "EVMKT",
+        "event": {
+            "eventId": 244587784,
+            "market": {
+                "outcome": {
+                    "hasPriceStream": false
+                },
+                "marketId": 827707354,
+                "names": {
+                    "en": "Total Points 152.5"
+                },
+                "group_names": {
+                    "en": "Total Points"
+                },
+                "ev_oc_grp_id": "2906",
+                "mkt_disp_code": "HL",
+                "mkt_disp_layout_columns": "2",
+                "mkt_disp_layout_order": "FBRESULT",
+                "mkt_type": "L",
+                "mkt_sort": "HL",
+                "mkt_grp_flags": "",
+                "ev_id": 244587784,
+                "status": "S",
+                "displayed": "N",
+                "disporder": 30,
+                "bir_index": "",
+                "raw_hcap": "152.5",
+                "hcap_values": {
+                    "H": "152.5",
+                    "B": "152.5",
+                    "L": "152.5",
+                    "E": "152.5"
+                },
+                "ew_avail": "N",
+                "ew_places": "",
+                "ew_fac_num": "",
+                "ew_fac_den": "",
+                "bet_in_run": "Y",
+                "lp_avail": "Y",
+                "sp_avail": "N",
+                "mm_coll_id": "71815",
+                "suspend_at": "",
+                "collections": [
+                    {
+                        "collection_id": "82902"
+                    }
+                ]
+            }
+        }
+    }
+]

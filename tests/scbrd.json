@@ -1,0 +1,28 @@
+42[
+    "244626839",
+    {
+        "publishedDate": "2024-05-08T20:58:09.923",
+        "type": "SCBRD",
+        "event": {
+            "eventId": 244626839,
+            "scoreboard": {
+                "ALL": [
+                    {
+                        "code": "SCORE",
+                        "value": "44",
+                        "ev_id": 244626839,
+                        "role_code": "HOME",
+                        "is_active": "N"
+                    },
+                    {
+                        "code": "SCORE",
+                        "value": "40",
+                        "ev_id": 244626839,
+                        "role_code": "AWAY",
+                        "is_active": "N"
+                    }
+                ]
+            }
+        }
+    }
+]

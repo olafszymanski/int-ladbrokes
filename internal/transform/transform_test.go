@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/olafszymanski/int-ladbrokes/internal/mapping"
 	"github.com/olafszymanski/int-ladbrokes/internal/transform"
 	"github.com/olafszymanski/int-sdk/integration/pb"
 	"github.com/stretchr/testify/require"
@@ -12,25 +13,30 @@ import (
 )
 
 var (
-	//go:embed testdata/basketball/invalid.json
-	basketballInvalidData []byte
-	//go:embed testdata/basketball/empty_start_time.json
-	basketballEmptyStartTimeData []byte
-	//go:embed testdata/basketball/invalid_start_time.json
-	basketballInvalidStartTimeData []byte
-	//go:embed testdata/basketball/too_many_participants.json
-	basketballTooManyParticipantsData []byte
-	//go:embed testdata/basketball/invalid_points_from_market.json
-	basketballInvalidPointsFromMarketData []byte
-	//go:embed testdata/basketball/invalid_points_from_price.json
-	basketballInvalidPointsFromPriceData []byte
-	//go:embed testdata/basketball/invalid_fixed_odds_availability.json
-	basketballInvalidFixedPointsAvailabilityData []byte
-	//go:embed testdata/basketball/success.json
-	basketballSuccessData []byte
-	//go:embed testdata/basketball/success_outright.json
-	basketballSuccessOutrightData []byte
+	//go:embed testdata/events/invalid.json
+	eventsInvalidData []byte
+	//go:embed testdata/events/empty_start_time.json
+	eventsEmptyStartTimeData []byte
+	//go:embed testdata/events/invalid_start_time.json
+	eventsInvalidStartTimeData []byte
+	//go:embed testdata/events/too_many_participants.json
+	eventsTooManyParticipantsData []byte
+	//go:embed testdata/events/invalid_points_from_market.json
+	eventsInvalidPointsFromMarketData []byte
+	//go:embed testdata/events/invalid_points_from_price.json
+	eventsInvalidPointsFromPriceData []byte
+	//go:embed testdata/events/invalid_fixed_odds_availability.json
+	eventsInvalidFixedPointsAvailabilityData []byte
+	//go:embed testdata/events/success.json
+	eventsSuccessData []byte
+	//go:embed testdata/events/success_outright.json
+	eventsSuccessOutrightData []byte
+
+	//go:embed testdata/updates/success.json
+	updatesSuccessData []byte
 )
+
+// TODO: Add test for classes and updates
 
 func TestTransformEventsBasketball(t *testing.T) {
 	tc := []struct {
@@ -47,49 +53,49 @@ func TestTransformEventsBasketball(t *testing.T) {
 		},
 		{
 			name:        "invalid data",
-			data:        basketballInvalidData,
+			data:        eventsInvalidData,
 			events:      nil,
 			expectedErr: transform.ErrDecodeResponse,
 		},
 		{
 			name:        "empty start time",
-			data:        basketballEmptyStartTimeData,
+			data:        eventsEmptyStartTimeData,
 			events:      nil,
 			expectedErr: transform.ErrParseTime,
 		},
 		{
 			name:        "invalid start time",
-			data:        basketballInvalidStartTimeData,
+			data:        eventsInvalidStartTimeData,
 			events:      nil,
 			expectedErr: transform.ErrParseTime,
 		},
 		{
 			name:        "too many participants",
-			data:        basketballTooManyParticipantsData,
+			data:        eventsTooManyParticipantsData,
 			events:      nil,
 			expectedErr: transform.ErrTooManyParticipants,
 		},
 		{
 			name:        "invalid points from market",
-			data:        basketballInvalidPointsFromMarketData,
+			data:        eventsInvalidPointsFromMarketData,
 			events:      nil,
 			expectedErr: transform.ErrParsePoints,
 		},
 		{
 			name:        "invalid points from price",
-			data:        basketballInvalidPointsFromPriceData,
+			data:        eventsInvalidPointsFromPriceData,
 			events:      nil,
 			expectedErr: transform.ErrParsePoints,
 		},
 		{
 			name:        "invalid fixed odds availability",
-			data:        basketballInvalidFixedPointsAvailabilityData,
+			data:        eventsInvalidFixedPointsAvailabilityData,
 			events:      nil,
 			expectedErr: transform.ErrParseFixedOddsAvailability,
 		},
 		{
 			name: "success",
-			data: basketballSuccessData,
+			data: eventsSuccessData,
 			events: []*pb.Event{
 				{
 					// ID:          "1",
@@ -182,7 +188,7 @@ func TestTransformEventsBasketball(t *testing.T) {
 		},
 		{
 			name: "success outright",
-			data: basketballSuccessOutrightData,
+			data: eventsSuccessOutrightData,
 			events: []*pb.Event{
 				{
 					// ID:          "1",
@@ -277,4 +283,40 @@ func getStringPtr(s string) *string {
 
 func getFloat64Ptr(f float64) *float64 {
 	return &f
+}
+
+func TestTransformUpdates(t *testing.T) {
+	tc := []struct {
+		name        string
+		data        []byte
+		update      *transform.Update
+		expectedErr error
+	}{
+		{
+			name: "success",
+			data: updatesSuccessData,
+			update: &transform.Update{
+				Data: map[mapping.UpdateType][]*transform.UpdateData{
+					mapping.PriceUpdateType: {
+						{
+							ID:      "1",
+							RawData: []byte(`MSEVENT0244772570!!!!'o0Lm8GsPRICE237261105000001e00001e{"lp_num": "4", "lp_den": "7"}`),
+						},
+					},
+				},
+			},
+			expectedErr: nil,
+		},
+	}
+
+	for _, tt := range tc {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			u, err := transform.TransformUpdates(tt.data)
+			require.ErrorIs(t, err, tt.expectedErr)
+			require.Equal(t, tt.update, u)
+		})
+	}
 }

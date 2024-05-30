@@ -4,7 +4,7 @@ build:
 
 .PHONY: run
 run: build
-	docker-compose up --force-recreate --build
+	docker-compose up --force-recreate --build --renew-anon-volumes
 
 .PHONY: lint
 lint:

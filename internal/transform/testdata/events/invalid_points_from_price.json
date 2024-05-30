@@ -1,0 +1,117 @@
+{
+    "SSResponse": {
+        "xmlns": "http://schema.openbet.com/SiteServer/2.81/SSResponse.xsd",
+        "children": [
+            {
+                "event": {
+                    "id": "243810572",
+                    "name": "AS Monaco v Crvena Zvezda",
+                    "eventStatusCode": "A",
+                    "isActive": "true",
+                    "isDisplayed": "true",
+                    "displayOrder": "0",
+                    "siteChannels": "P,p,Q,R,C,I,M,",
+                    "eventSortCode": "MTCH",
+                    "startTime": "2024-03-07T18:00:00Z",
+                    "rawIsOffCode": "-",
+                    "classId": "25",
+                    "typeId": "63",
+                    "sportId": "6",
+                    "liveServChannels": "sEVENT0243810572,",
+                    "liveServChildrenChannels": "SEVENT0243810572,",
+                    "categoryId": "6",
+                    "categoryCode": "BASKETBALL",
+                    "categoryName": "Basketball",
+                    "categoryDisplayOrder": "-10005",
+                    "className": "European Competitions",
+                    "classDisplayOrder": "-10000",
+                    "classSortCode": "ST",
+                    "typeName": "Euroleague Men",
+                    "typeDisplayOrder": "-10000",
+                    "typeFlagCodes": "GVA,IVA,PVA,",
+                    "isOpenEvent": "true",
+                    "isNext24HourEvent": "true",
+                    "isNext2DayEvent": "true",
+                    "isNext1WeekEvent": "true",
+                    "drilldownTagNames": "EVFLAG_IVM,EVFLAG_BL,",
+                    "isAvailable": "true",
+                    "mediaTypeCodes": "VST,",
+                    "hasVideoStream": "true",
+                    "fixedOddsAvail": "true",
+                    "cashoutAvail": "Y",
+                    "isBettable": "true",
+                    "children": [
+                        {
+                            "market": {
+                                "id": "807508666",
+                                "eventId": "243810572",
+                                "templateMarketId": "2952014",
+                                "templateMarketName": "Quarter Spread",
+                                "dispSortId": "1673",
+                                "dispSortName": "2W",
+                                "collectionIds": "82904,",
+                                "collectionNames": "Quarter Markets,",
+                                "marketMeaningMajorCode": "H",
+                                "marketMeaningMinorCode": "WH",
+                                "name": "1st Quarter Spread 1.5",
+                                "isLpAvailable": "true",
+                                "rawHandicapValue": "1.5",
+                                "displayOrder": "3600",
+                                "marketStatusCode": "A",
+                                "isActive": "true",
+                                "isDisplayed": "true",
+                                "fixedOddsAvail": "true",
+                                "siteChannels": "P,p,Q,R,C,I,M,",
+                                "liveServChannels": "sEVMKT0807508666,",
+                                "liveServChildrenChannels": "SEVMKT0807508666,",
+                                "priceTypeCodes": "LP,",
+                                "isBettable": "true",
+                                "isAvailable": "true",
+                                "maxAccumulators": "25",
+                                "minAccumulators": "1",
+                                "cashoutAvail": "N",
+                                "termsWithBet": "N",
+                                "children": [
+                                    {
+                                        "outcome": {
+                                            "id": "2281242534",
+                                            "marketId": "807508666",
+                                            "name": "AS Monaco",
+                                            "outcomeMeaningMajorCode": "WH",
+                                            "outcomeMeaningMinorCode": "H",
+                                            "displayOrder": "1",
+                                            "outcomeStatusCode": "A",
+                                            "isActive": "true",
+                                            "isDisplayed": "true",
+                                            "siteChannels": "P,p,Q,R,C,I,M,",
+                                            "fixedOddsAvail": "true",
+                                            "liveServChannels": "sSELCN2281242534,",
+                                            "liveServChildrenChannels": "SSELCN2281242534,",
+                                            "isAvailable": "true",
+                                            "cashoutAvail": "N",
+                                            "children": [
+                                                {
+                                                    "price": {
+                                                        "id": "173",
+                                                        "priceType": "LP",
+                                                        "priceNum": "3",
+                                                        "priceDen": "10",
+                                                        "priceDec": "1.30",
+                                                        "priceAmerican": "-334",
+                                                        "rawHandicapValue": "INVALID",
+                                                        "isActive": "true",
+                                                        "displayOrder": "1"
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}

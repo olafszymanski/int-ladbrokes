@@ -1,0 +1,36 @@
+42[
+    "244587784",
+    {
+        "publishedDate": "2024-05-08T18:07:55.409",
+        "type": "SELCN",
+        "event": {
+            "eventId": 244587784,
+            "market": {
+                "outcome": {
+                    "names": {
+                        "en": "Under"
+                    },
+                    "status": "A",
+                    "settled": "N",
+                    "result": "-",
+                    "displayed": "Y",
+                    "disporder": 2,
+                    "runner_num": "",
+                    "fb_result": "L",
+                    "lp_num": "3",
+                    "lp_den": "4",
+                    "cs_home": "",
+                    "cs_away": "",
+                    "unique_id": "2360750559_a10a97253d7745663bbf6d01a124",
+                    "outcomeId": 2360750559,
+                    "hasPriceStream": false,
+                    "price": {
+                        "lp_den": "4",
+                        "lp_num": "3"
+                    }
+                },
+                "marketId": 829175628
+            }
+        }
+    }
+]

@@ -38,6 +38,9 @@ const (
 	updateIdStartIndex         = idLength + 4 + requestBodyPartLength + 2 + updateTypeLength - 1
 	updateDataStartIndex       = idLength + 4 + requestBodyPartLength + 2 + updateTypeLength + idLength + 12 - 1
 	requestBodyPartsStartIndex = idLength + 4 - 1
+
+	suspendedStatus = "S"
+	notDisplayed    = "N"
 )
 
 var defaultLastRequestBodyPart = []byte("!!!!!0")
@@ -52,6 +55,22 @@ func UnmarshalUpdate[T updateType](rawData []byte) (*T, error) {
 		return nil, fmt.Errorf("%w: %s", ErrDecodeResponse, err)
 	}
 	return t, nil
+}
+
+func IsEventFinished(update *model.EventUpdate) bool {
+	return update.Status == suspendedStatus && update.Displayed == notDisplayed
+}
+
+func IsMarketSuspended(update *model.MarketUpdate) bool {
+	return update.Status == suspendedStatus
+}
+
+func IsMarketRemoved(update *model.MarketUpdate) bool {
+	return update.Status == suspendedStatus && update.Displayed == notDisplayed
+}
+
+func IsSelectionSuspended(update *model.SelectionUpdate) bool {
+	return update.Status == suspendedStatus
 }
 
 // splits rawData into individual raw updates for further processing
@@ -74,6 +93,7 @@ func getUpdateType(rawData []byte) (mapping.UpdateType, error) {
 	return ut, nil
 }
 
+// TODO: FIX
 func getEventId(rawData []byte) string {
 	return string(rawData[:idLength-1])
 }
@@ -88,9 +108,9 @@ func getUpdateId(rawData []byte, updateType mapping.UpdateType) string {
 
 func getUpdateDataId(rawData []byte, updateType mapping.UpdateType) (string, error) {
 	switch updateType {
-	case mapping.EventUpdateType, mapping.MarketUpdateType:
+	case mapping.EventUpdateType:
 		return getEventId(rawData), nil
-	case mapping.SelectionUpdateType, mapping.PriceUpdateType:
+	case mapping.SelectionUpdateType, mapping.PriceUpdateType, mapping.MarketUpdateType:
 		return getUpdateId(rawData, updateType), nil
 	default:
 		return "", fmt.Errorf("unknown update type")
